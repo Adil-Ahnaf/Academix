@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Portal.ViewModels;
-using Newtonsoft.Json;
 
 namespace Portal.Controllers
 {
