@@ -8,7 +8,7 @@ using System.Text;
 
 namespace DataAccessLayer.SqlDb
 {
-    internal class SqlDapperDataAccess : IDataAccess
+    public class SqlDapperDataAccess : IDataAccess
     {
         public string ConnectionKey { get; set; }
         public string ConnectionString { get; set; }

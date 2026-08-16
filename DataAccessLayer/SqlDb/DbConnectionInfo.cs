@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DataAccessLayer.SqlDb
 {
-    internal class DbConnectionInfo
+    public class DbConnectionInfo
     {
         public string Key { get; set; }
         public string Value { get; set; }
