@@ -1,13 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Portal.Models;
 using System.Diagnostics;
 
 namespace Portal.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         public IActionResult Index()
         {
+            var userName = User.Identity?.Name;
+            ViewBag.UserName = userName;
             return View();
         }
 

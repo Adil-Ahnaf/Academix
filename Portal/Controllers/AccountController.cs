@@ -30,7 +30,7 @@ namespace Portal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UserLogin(LoginViewModel model, string recaptchaResponse)
+        public async Task<IActionResult> UserLogin(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View("Login", model);
