@@ -1,3 +1,4 @@
+using DataAccessLayer.DataAccess;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Portal.Models;
@@ -6,12 +7,28 @@ using System.Diagnostics;
 namespace Portal.Controllers
 {
     [Authorize]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
+        private readonly ITeachersData _teachersData;
+
+        public HomeController(ITeachersData teachersData)
+        {
+           _teachersData = teachersData; 
+        }
+
         public IActionResult Index()
         {
             var userName = User.Identity?.Name;
             ViewBag.UserName = userName;
+
+            if (User.IsInRole("Admin"))
+            {
+                AdminDashboardViewModel model = new AdminDashboardViewModel();
+                var teacher = _teachersData.GetAllTeachers();
+
+                model.TotalTeacher = teacher.Count;
+            }
+
             return View();
         }
 

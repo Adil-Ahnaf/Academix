@@ -1,7 +1,12 @@
 using AspNetCore.Identity.Dapper;
 using AspNetCore.Identity.Dapper.Models;
-using Microsoft.AspNetCore.Identity;
+using BusinessLayer.Services.CsvService;
+using BusinessLayer.Services.ExcelService;
+using BusinessLayer.Services.ExportService;
+using BusinessLayer.Services.HtmlService;
+using DataAccessLayer.DataAccess;
 using DataAccessLayer.SqlDb;
+using Microsoft.AspNetCore.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -72,5 +77,17 @@ void ResolveServiceType(IServiceCollection services)
 {
     services.AddSingleton(new DbConnectionInfo { Key = "Portal_DbConnection" });
     services.AddSingleton<IDataAccess, SqlDapperDataAccess>();
+    builder.Services.AddScoped<IExportService, ExportService>();
+    builder.Services.AddScoped<IExcelService, ExcelService>();
+    builder.Services.AddScoped<ICsvService, CsvService>();
+    builder.Services.AddScoped<IHtmlService, HtmlService>();
+    builder.Services.AddSingleton<ITeachersData, TeachersData>();
+    builder.Services.AddSingleton<IStudentsData, StudentsData>();
+    builder.Services.AddSingleton<IAssignmentsData, AssignmentsData>();
+    builder.Services.AddSingleton<IClassesData, ClassesData>();
+    builder.Services.AddSingleton<IStudentEnrollmentsData, StudentEnrollmentsData>();
+    builder.Services.AddSingleton<ISubjectsData, SubjectsData>();
+    builder.Services.AddSingleton<ISubmissionsData, SubmissionsData>();
+    builder.Services.AddSingleton<ITeacherEnrollmentsData, TeacherEnrollmentsData>();
 }
 

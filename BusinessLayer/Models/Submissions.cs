@@ -1,0 +1,33 @@
+using System.ComponentModel.DataAnnotations;
+namespace BusinessLayer.Models
+{
+	public class Submissions
+	{
+		[Display(Name = "Id")]
+		public long Id { get; set; }
+		[Display(Name = "Assignment Id")]
+		public long AssignmentId { get; set; }
+		[Display(Name = "Student Id")]
+		public long StudentId { get; set; }
+		[Display(Name = "File Name")]
+		public string FileName { get; set; }
+		[Display(Name = "File Path")]
+		public string FilePath { get; set; }
+		[Display(Name = "Marks")]
+		public decimal? Marks { get; set; }
+		[Display(Name = "Feedback")]
+		public string? Feedback { get; set; }
+		[Display(Name = "Submission Guid")]
+		public Guid SubmissionGuid { get; set; }
+		[Display(Name = "Created Date")]
+		public DateTime? CreatedDate { get; set; }
+		[Display(Name = "Created By")]
+		public string? CreatedBy { get; set; }
+		[Display(Name = "Modified Date")]
+		public DateTime? ModifiedDate { get; set; }
+		[Display(Name = "Modified By")]
+		public string? ModifiedBy { get; set; }
+		[Display(Name = "Is Active")]
+		public bool IsActive { get; set; }
+	}
+}

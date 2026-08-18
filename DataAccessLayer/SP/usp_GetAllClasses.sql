@@ -1,0 +1,7 @@
+CREATE OR ALTER PROCEDURE [dbo].[usp_GetAllClasses]
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	SELECT * FROM [dbo].[Classes];
+END
