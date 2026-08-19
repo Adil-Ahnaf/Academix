@@ -4,44 +4,41 @@
 }
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4">Dashboard</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item active">Dashboard</li>
-    </ol>
+    <h4 class="mt-4">Dashboard</h4>
     <div class="row">
         <div class="col-xl-3 col-md-6">
             <div class="card bg-primary text-white mb-4">
-                <div class="card-body">Total Teacher : @Model.TotalTeacher</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-chalkboard-user fa-3x mb-3"></i>
+                    <h2 class="fw-bold">@Model.TotalTeacher</h2>
+                    <p class="mb-0">Total Teachers</p>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
             <div class="card bg-warning text-white mb-4">
-                <div class="card-body">Total Student : @Model.TotalStudent</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-user-graduate fa-3x mb-3"></i>
+                    <h2 class="fw-bold">@Model.TotalStudent</h2>
+                    <p class="mb-0">Total Students</p>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
             <div class="card bg-success text-white mb-4">
-                <div class="card-body">Total Class : @Model.TotalClass</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-school fa-3x mb-3"></i>
+                    <h2 class="fw-bold">@Model.TotalClass</h2>
+                    <p class="mb-0">Total Classes</p>
                 </div>
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
             <div class="card bg-danger text-white mb-4">
-                <div class="card-body">Total Subject : @Model.TotalSubject</div>
-                <div class="card-footer d-flex align-items-center justify-content-between">
-                    <a class="small text-white stretched-link" href="#">View Details</a>
-                    <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                <div class="card-body text-center">
+                    <i class="fa-solid fa-book fa-3x mb-3"></i>
+                    <h2 class="fw-bold">@Model.TotalSubject</h2>
+                    <p class="mb-0">Total Subjects</p>
                 </div>
             </div>
         </div>
@@ -52,10 +49,33 @@
             DataTable Example
         </div>
         <div class="card-body">
-
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="classes_table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>@Html.DisplayNameFor(model => model.Classes.First().ClassName)</th>
+                                <th>@Html.DisplayNameFor(model => model.Classes.First().Section)</th>
+                                <th>@Html.DisplayNameFor(model => model.Classes.First().AcademicYear)</th>
+                                <th>@Html.DisplayNameFor(model => model.Classes.First().MaxCapacity)</th>
+                                <th>@Html.DisplayNameFor(model => model.Classes.First().ClassGuid)</th>
+                                <th>@Html.DisplayNameFor(model => model.Classes.First().IsActive)</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+@section Styles {
+    <link rel="stylesheet" href="~/lib/datatables/css/dataTables.bootstrap5.css" asp-append-version="true" />
+}
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script src="~/lib/datatables/js/jquery.dataTables.js" asp-append-version="true"></script>
+    <script src="~/lib/datatables/js/dataTables.bootstrap5.js" asp-append-version="true"></script>
+    <script src="~/lib/datatables-buttons/dataTables.buttons.min.js" asp-append-version="true"></script>
+    <script src="~/js/classes.js" asp-append-version="true"></script>
 }
