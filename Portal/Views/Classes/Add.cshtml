@@ -1,0 +1,59 @@
+@model Portal.Models.ClassesViewModelAdd
+@{
+    ViewData["Title"] = "Classes";
+}
+
+<div class="container col-8 mt-4">
+    <center><h1>Add New Class</h1></center>
+    <form id="classes_form" method="post" asp-controller="Classes" asp-action="Insert" enctype="multipart/form-data">
+        
+		<div class="mb-3">
+			<label class="form-label" asp-for="ClassName"></label><span class="text-danger">*</span>
+			<input type="text" class="form-control" asp-for="ClassName" required>
+		</div>
+		<div class="mb-3">
+			<label class="form-label" asp-for="Section"></label><span class="text-danger">*</span>
+			<input type="text" class="form-control" asp-for="Section" required>
+		</div>
+		<div class="mb-3">
+			<label class="form-label" asp-for="AcademicYear"></label><span class="text-danger">*</span>
+			<input type="number" class="form-control" asp-for="AcademicYear" required>
+		</div>
+		<div class="mb-3">
+			<label class="form-label" asp-for="MaxCapacity"></label><span class="text-danger">*</span>
+			<input type="number" class="form-control" asp-for="MaxCapacity" required>
+		</div>
+        <div class="mb-5">
+            <button class="btn btn-primary" id="submit-btn" type="submit">Submit</button>
+            <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts{
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    
+    <script>
+        var formName = "#classes_form";
+        $(formName).validate({
+            errorClass: 'text-danger',
+            rules:{
+                ClassName: 'required',
+				Section: 'required',
+				AcademicYear: 'required',
+				MaxCapacity: 'required'
+            },
+            messages:{
+                ClassName: 'Please enter Class Name',
+				Section: 'Please enter Section',
+				AcademicYear: 'Please enter Academic Year',
+				MaxCapacity: 'Please enter Max Capacity'
+            }
+        });
+        $(document).on("click", "#submit-btn", function() {
+            if ($(formName).valid()) {
+                $(formName).submit();
+            }
+        });
+    </script>
+}

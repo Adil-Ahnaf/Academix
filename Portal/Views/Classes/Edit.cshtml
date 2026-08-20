@@ -1,0 +1,85 @@
+@model Portal.Models.ClassesViewModelEdit
+@{
+    ViewData["Title"] = "Classes";
+}
+
+<div class="container col-8 mt-4">
+    <center><h1>Edit Classes</h1></center>
+    @if (@Model != null)
+    {
+        <form id="classes_form" method="post" asp-controller="Classes" asp-action="Update" enctype="multipart/form-data">
+
+            <div class="mb-3 d-none">
+                <input type="hidden" class="form-control" asp-for="Id" value="@Model.Id">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="ClassName"></label><span class="text-danger">*</span>
+                <input type="text" class="form-control" asp-for="ClassName" value="@Model.ClassName" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="Section"></label><span class="text-danger">*</span>
+                <input type="text" class="form-control" asp-for="Section" value="@Model.Section" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="AcademicYear"></label><span class="text-danger">*</span>
+                <input type="text" class="form-control" asp-for="AcademicYear" value="@Model.AcademicYear" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="MaxCapacity"></label><span class="text-danger">*</span>
+                <input type="text" class="form-control" asp-for="MaxCapacity" value="@Model.MaxCapacity" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" asp-for="IsActive"></label><span class="text-danger">*</span>
+                <div class="mt-2">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="IsActive" value="true" id="activeRadio" />
+                        <label class="form-check-label" for="activeRadio">Active</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="IsActive" value="false" id="inactiveRadio" />
+                        <label class="form-check-label" for="inactiveRadio">Inactive </label>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-5">
+                <button class="btn btn-primary" id="submit-btn" type="submit">Submit</button>
+                <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Cancel</a>
+            </div>
+        </form>
+    }
+    else
+    {
+        <h3>No data avaliable.</h3>
+    }
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/tinymce/tinymce.min.js"></script>
+    <script src="~/js/tiny-custom.js" asp-append-version="true"></script>
+    <script>
+        var formName = "#classes_form";
+        $(formName).validate({
+            errorClass: 'text-danger',
+            rules: {
+                ClassName: 'required',
+                Section: 'required',
+                AcademicYear: 'required',
+                MaxCapacity: 'required',
+                IsActive: 'required'
+            },
+            messages: {
+                ClassName: 'Please enter Class Name',
+                Section: 'Please enter Section',
+                AcademicYear: 'Please enter Academic Year',
+                MaxCapacity: 'Please enter Max Capacity',
+                IsActive: 'Please enter Is Active'
+            }
+        });
+        $(document).on("click", "#submit-btn", function () {
+            if ($(formName).valid()) {
+                $(formName).submit();
+            }
+        });
+    </script>
+}

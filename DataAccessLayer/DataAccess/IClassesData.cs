@@ -6,7 +6,7 @@ namespace DataAccessLayer.DataAccess
 	{
 		long InsertClasses(Classes classes);
 		List<Classes> GetAllClasses();
-		Classes GetClassesById(long id);
+		Classes GetClassesById(Guid classGuid);
 		void DeleteClassesById(long id);
 		void UpdateClassesById(Classes classes);
 	}

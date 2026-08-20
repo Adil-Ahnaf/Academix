@@ -37,16 +37,16 @@ $(document).ready(function () {
 
         columns: [
             {
+                data: "academicYear",
+                name: "AcademicYear"
+            },
+            {
                 data: "className",
                 name: "ClassName"
             },
             {
                 data: "section",
                 name: "Section"
-            },
-            {
-                data: "academicYear",
-                name: "AcademicYear"
             },
             {
                 data: "maxCapacity",
@@ -56,7 +56,9 @@ $(document).ready(function () {
                 data: "isActive",
                 name: "IsActive",
                 render: function (data) {
-                    return data ? "Active" : "Inactive";
+                    return data
+                        ? '<span class="badge bg-success">Active</span>'
+                        : '<span class="badge bg-danger">Inactive</span>';
                 }
             },
             {

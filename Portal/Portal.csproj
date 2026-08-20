@@ -20,6 +20,7 @@
   <ItemGroup>
     <Folder Include="Extensions\" />
     <Folder Include="Models\DatatableModels\" />
+    <Folder Include="Views\Classes\" />
     <Folder Include="wwwroot\lib\bootstrap\dist\" />
   </ItemGroup>
 
