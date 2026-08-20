@@ -19,7 +19,7 @@ namespace Portal.Controllers
         private readonly ISubjectsData _subjectsData;
         private readonly IExportService _exportService;
 
-        public HomeController(ITeachersData teachersData, IStudentsData studentsData, IClassesData classesData, 
+        public HomeController(ITeachersData teachersData, IStudentsData studentsData, IClassesData classesData,
             ISubjectsData subjectsData, IExportService exportService)
         {
             _teachersData = teachersData;
@@ -64,49 +64,116 @@ namespace Portal.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        [HttpPost("Home/Index/LoadTable")]
-        public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
+        [HttpPost]
+        public IActionResult LoadTable([FromBody] DtParameters? dtParameters)
         {
-            var searchBy = dtParameters.Search?.Value;
-
-            // if we have an empty search then just order the results by Id ascending
-            var orderCriteria = "Id";
-            var orderAscendingDirection = true;
-
-            if (dtParameters.Order != null)
+            if (dtParameters == null)
             {
-                // in this example we just default sort on the 1st column
-                orderCriteria = dtParameters.Columns[dtParameters.Order[0].Column].Data;
-                orderAscendingDirection = dtParameters.Order[0].Dir.ToString().ToLower() == "asc";
+                return BadRequest(new
+                {
+                    error = "DataTables parameters are null."
+                });
+            }
+
+            string? searchBy = dtParameters.Search?.Value;
+            string orderCriteria = "Id";
+            bool orderAscendingDirection = true;
+
+            if (dtParameters.Order != null && dtParameters.Order.Length > 0 && dtParameters.Columns != null)
+            {
+                int columnIndex = dtParameters.Order[0].Column;
+
+                if (columnIndex >= 0 && columnIndex < dtParameters.Columns.Length)
+                {
+                    string? requestedColumn = dtParameters.Columns[columnIndex].Data;
+
+                    if (!string.IsNullOrWhiteSpace(requestedColumn))
+                    {
+                        orderCriteria = requestedColumn;
+                    }
+                }
+                orderAscendingDirection = !string.Equals(dtParameters.Order[0].Dir, "desc", StringComparison.OrdinalIgnoreCase);
             }
 
             var result = _classesData.GetAllClasses().AsQueryable();
-            var totalResultsCount = result.Count();
-            if (!string.IsNullOrEmpty(searchBy))
+
+            int totalResultsCount = result.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchBy))
             {
-                result = result.Where(r => r.ClassName != null && r.ClassName.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Section != null && r.Section.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.AcademicYear != null && r.AcademicYear.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.MaxCapacity != null && r.MaxCapacity.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.ClassGuid != null && r.ClassGuid.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                string search = searchBy.Trim();
+
+                result = result.Where(r =>
+                    (r.ClassName != null &&
+                     r.ClassName.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    (r.Section != null &&
+                     r.Section.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    (r.AcademicYear != null &&
+                     r.AcademicYear.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    r.MaxCapacity
+                        .ToString()
+                        .Contains(search)
+
+                    ||
+
+                    r.IsActive
+                        .ToString()
+                        .Contains(
+                            search,
+                            StringComparison.OrdinalIgnoreCase)
+                );
             }
 
-            result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
+            result = orderAscendingDirection
+                ? result.OrderByDynamic(
+                    orderCriteria,
+                    DtOrderDir.Asc)
 
-            // now just get the count of items (without the skip and take) - eg how many could be returned with filtering
-            var filteredResultsCount = result.Count();
+                : result.OrderByDynamic(
+                    orderCriteria,
+                    DtOrderDir.Desc);
 
+            int filteredResultsCount = result.Count();
+
+            int start = Math.Max(
+                dtParameters.Start,
+                0);
+
+            int length = dtParameters.Length;
+
+
+            if (length <= 0)
+            {
+                length = 10;
+            }
+
+
+            var data = result
+                .Skip(start)
+                .Take(length)
+                .ToList();
 
             return Json(new DtResult<Classes>
             {
                 Draw = dtParameters.Draw,
                 RecordsTotal = totalResultsCount,
                 RecordsFiltered = filteredResultsCount,
-                Data = result
-                    .Skip(dtParameters.Start)
-                    .Take(dtParameters.Length)
-                    .ToList()
+                Data = data
             });
         }
     }
