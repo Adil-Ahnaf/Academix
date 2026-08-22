@@ -45,6 +45,10 @@ $(document).ready(function () {
                 name: "ClassName"
             },
             {
+                data: "subjectName",
+                name: "SubjectName"
+            },
+            {
                 data: "section",
                 name: "Section"
             },

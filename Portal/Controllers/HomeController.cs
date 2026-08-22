@@ -111,6 +111,13 @@ namespace Portal.Controllers
 
                     ||
 
+                    (r.SubjectName != null &&
+                     r.SubjectName.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
                     (r.Section != null &&
                      r.Section.Contains(
                          search,

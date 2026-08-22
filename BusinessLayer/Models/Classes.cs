@@ -7,7 +7,11 @@ namespace BusinessLayer.Models
 		public long Id { get; set; }
 		[Display(Name = "Class Name")]
 		public string ClassName { get; set; }
-		[Display(Name = "Section")]
+        [Display(Name = "Subject Id")]
+        public long SubjectId { get; set; }
+        [Display(Name = "Subject Name")]
+        public string SubjectName { get; set; }
+        [Display(Name = "Section")]
 		public string Section { get; set; }
 		[Display(Name = "Academic Year")]
 		public string AcademicYear { get; set; }

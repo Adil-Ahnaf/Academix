@@ -3,5 +3,7 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT * FROM [dbo].[Classes];
+	SELECT *, S.Name AS SubjectName 
+	FROM [dbo].[Classes] AS C
+	INNER JOIN [dbo].[Subjects] AS S ON C.SubjectId = S.Id;
 END

@@ -7,7 +7,9 @@ namespace Portal.Models
 	{
 		[Display(Name = "Class Name")]
 		public string ClassName { get; set; }
-		[Display(Name = "Section")]
+        [Display(Name = "Subject")]
+        public long SubjectId { get; set; }
+        [Display(Name = "Section")]
 		public string Section { get; set; }
 		[Display(Name = "Academic Year")]
 		public string AcademicYear { get; set; }
@@ -15,5 +17,6 @@ namespace Portal.Models
 		public int MaxCapacity { get; set; }
 		[Display(Name = "Class Guid")]
 		public Guid ClassGuid { get; set; }
-	}
+        public SelectList? SubjectOptions { get; set; }
+    }
 }
