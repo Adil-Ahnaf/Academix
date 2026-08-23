@@ -1,49 +1,187 @@
-﻿@model Portal.Models.TeacherEnrollmentsViewModel
-@{
-    ViewData["Title"] = "Teacher Enrollments";
-}
+﻿@model TeacherEnrollmentsViewModel
+
 <div class="container-fluid px-4">
-    <h4 class="my-4">Dashboard</h4>
 
-    <div class="row">
-        <div class="col-12">
-            <div class="card bg-primary text-white mb-4">
-                <div class="card-body p-4">
-                    <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
+    <h4 class="my-4">Teacher Dashboard</h4>
 
-                        <!-- Left: Profile Photo -->
-                        <div class="me-md-4 mb-3 mb-md-0 text-center">
-                            <img src="~/image/default-user-profile.png"
-                                 alt="Teacher Profile"
-                                 class="rounded-circle border border-white border-3"
-                                 width="140"
-                                 height="140"
-                                 style="object-fit:cover;">
-                        </div>
+    <!-- Teacher Information -->
+    <div class="card shadow-sm border-1 mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center">
 
-                        <!-- Right: Teacher Information -->
-                        <div class="flex-grow-1 text-center text-md-start">
-                            <h2 class="fw-bold mb-2">@Model.Teacher.FullName</h2>
+                <img src="~/image/default-user-profile.png"
+                     alt="Teacher Profile"
+                     class="rounded-circle border border-3 border-primary me-4"
+                     width="140"
+                     height="140"
+                     style="object-fit:cover;" />
 
-                            <p class="mb-1">
-                                <i class="fa-solid fa-building me-2"></i>
-                                <strong>Department:</strong> @Model.Teacher.Department
-                            </p>
+                <div>
+                    <input type="hidden" id="teacherGuid" value="@Model.Teacher.TeacherGuid" />
+                    <h2 class="fw-bold text-dark mb-3">@Model.Teacher.FullName</h2>
+                    <p class="text-muted mb-2">
+                        <i class="fa-solid fa-building text-primary me-2"></i>
+                        <strong class="text-dark">Department:</strong> @Model.Teacher.Department
+                    </p>
 
-                            <p class="mb-1">
-                                <i class="fa-solid fa-venus-mars me-2"></i>
-                                <strong>Gender:</strong> @Model.Teacher.Gender
-                            </p>
+                    <p class="text-muted mb-2">
+                        <i class="fa-solid fa-venus-mars text-primary me-2"></i>
+                        <strong class="text-dark">Gender:</strong> @Model.Teacher.Gender
+                    </p>
 
-                            <p class="mb-0">
-                                <i class="fa-solid fa-user-tie me-2"></i>
-                                <strong>Role:</strong> Teacher
-                            </p>
-                        </div>
-
-                    </div>
+                    <p class="text-muted mb-0">
+                        <i class="fa-solid fa-user-tie text-primary me-2"></i>
+                        <strong class="text-dark">Role:</strong> Teacher
+                    </p>
                 </div>
+
             </div>
         </div>
     </div>
+
+    <!-- Enrolled Class List -->
+    <div class="card shadow-sm border-1 my-5">
+        <div class="card-header bg-white fw-semibold fs-5">
+            <i class="fa-solid fa-user-check text-primary me-2"></i>
+            Enrolled Class List
+        </div>
+
+        <div class="card-body p-0">
+            <table id="enrolledClassesTable" class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Academic Year</th>
+                        <th>Class Name</th>
+                        <th>Subject</th>
+                        <th>Section</th>
+                        <th>Max Capacity</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.TeacherEnrollmentsList?.Any() == true)
+                    {
+                        @foreach (var item in Model.TeacherEnrollmentsList)
+                        {
+                            <tr>
+                                <td>@item.AcademicYear</td>
+                                <td>@item.ClassName</td>
+                                <td>@item.SubjectName</td>
+                                <td>@item.Section</td>
+                                <td>@item.MaxCapacity</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger remove-btn" data-class-guid="@item.Id">Remove</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                No enrolled classes found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Available Class List -->
+    <div class="card shadow-sm border-1 my-5">
+        <div class="card-header bg-white fw-semibold fs-5">
+            <i class="fa-solid fa-list text-primary me-2"></i>
+            Available Class List
+        </div>
+
+        <div class="card-body p-0">
+            <table id="availableClassesTable" class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Academic Year</th>
+                        <th>Class Name</th>
+                        <th>Subject</th>
+                        <th>Section</th>
+                        <th>Max Capacity</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.ClassesList?.Any() == true)
+                    {
+                        @foreach (var item in Model.ClassesList)
+                        {
+                            <tr>
+                                <td>@item.AcademicYear</td>
+                                <td>@item.ClassName</td>
+                                <td>@item.SubjectName</td>
+                                <td>@item.Section</td>
+                                <td>@item.MaxCapacity</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-primary enroll-btn" data-class-guid="@item.ClassGuid">Enroll</button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                No available classes found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </div>
+
+@section Scripts {
+    <script>
+        $(document).on('click', '.enroll-btn', function() {
+
+            var button = $(this);
+            var classGuid = button.data('class-guid');
+
+            $.ajax({
+                url: '@Url.Action("Insert", "TeacherEnrollments")',
+                type: 'POST',
+                data: {
+                    classGuid: classGuid,
+                    teacherGuid: $('#teacherGuid').val()    
+                },
+                success: function(response) {
+
+                    if (response.success) {
+
+                        // Add new class to enrolled table
+                        $('#enrolledClassesTable tbody').append(`
+                                    <tr>
+                                        <td>${response.academicYear}</td>
+                                        <td>${response.className}</td>
+                                        <td>${response.subject}</td>
+                                        <td>${response.section}</td>
+                                        <td>${response.maxCapacity}</td>
+                                    </tr>
+                                `);
+
+                        // Remove class from available list
+                        button.closest('tr').remove();
+
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('An error occurred while enrolling the class.');
+                    console.log(xhr.responseText);
+                }
+            });
+        });
+    </script>
+}

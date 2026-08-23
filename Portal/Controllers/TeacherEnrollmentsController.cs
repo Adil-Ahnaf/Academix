@@ -38,24 +38,29 @@ namespace Portal.Controllers
             return View(model);
         }
 
-        public IActionResult Add()
-        {
-            var model = new TeacherEnrollmentsViewModelAdd();
-            return View(model);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> Insert(TeacherEnrollmentsViewModelAdd model)
+        public async Task<IActionResult> Insert(Guid classGuid, Guid teacherGuid)
         {
+            var class_data = _classesData.GetClassesById(classGuid);
+            var teacher_data = _teachersData.GetTeachersById(teacherGuid);
 
             long teacherEnrollmentsId = _teacherEnrollmentsData.InsertTeacherEnrollments(new TeacherEnrollments()
             {
-                TeacherId = model.TeacherId,
-                ClassId = model.ClassId,
+                TeacherId = teacher_data.Id,
+                ClassId = class_data.Id,
                 CreatedDate = DateTime.Now,
                 IsActive = true
             });
-            return RedirectToAction("Index", "TeacherEnrollments");
+
+            return Json(new
+            {
+                success = true,
+                academicYear = class_data.AcademicYear,
+                className = class_data.ClassName,
+                subject = class_data.SubjectName,
+                section = class_data.Section,
+                maxCapacity = class_data.MaxCapacity
+            });
         }
         public IActionResult Edit(int id)
         {
