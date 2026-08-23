@@ -9,5 +9,6 @@ namespace DataAccessLayer.DataAccess
 		TeacherEnrollments GetTeacherEnrollmentsById(long id);
 		void DeleteTeacherEnrollmentsById(long id);
 		void UpdateTeacherEnrollmentsById(TeacherEnrollments teacherenrollments);
+		List<TeacherEnrollments> GetATeacherAllEnrollments(Guid teacherGuid);
 	}
 }

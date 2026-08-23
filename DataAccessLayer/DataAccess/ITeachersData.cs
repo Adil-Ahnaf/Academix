@@ -6,7 +6,7 @@ namespace DataAccessLayer.DataAccess
 	{
 		long InsertTeachers(Teachers teachers);
 		List<Teachers> GetAllTeachers();
-		Teachers GetTeachersById(long id);
+		Teachers GetTeachersById(Guid teacherGuid);
 		void DeleteTeachersById(long id);
 		void UpdateTeachersById(Teachers teachers);
 	}

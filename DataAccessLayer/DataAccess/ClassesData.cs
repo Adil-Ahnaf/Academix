@@ -38,5 +38,10 @@ namespace DataAccessLayer.DataAccess
 			_dataAccess.Execute(SpConstants.UpdateClassesById, new{ classes.Id, classes.ClassName, classes.SubjectId, classes.Section, classes.AcademicYear, classes.MaxCapacity, classes.ClassGuid, classes.ModifiedDate, classes.ModifiedBy, classes.IsActive });
 		}
 
-	}
+        public List<Classes> GetAllActiveClasses()
+		{
+            return _dataAccess.GetList<Classes>(SpConstants.GetAllActiveClasses);
+        }
+
+    }
 }

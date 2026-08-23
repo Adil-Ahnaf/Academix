@@ -38,5 +38,9 @@ namespace DataAccessLayer.DataAccess
 			_dataAccess.Execute(SpConstants.UpdateTeacherEnrollmentsById, new{ teacherenrollments.Id, teacherenrollments.TeacherId, teacherenrollments.ClassId, teacherenrollments.ModifiedDate, teacherenrollments.IsActive });
 		}
 
-	}
+        public List<TeacherEnrollments> GetATeacherAllEnrollments(Guid teacherGuid)
+        {
+            return _dataAccess.GetList<TeacherEnrollments>(SpConstants.GetATeacherAllEnrollments, new { teacherGuid });
+        }
+    }
 }

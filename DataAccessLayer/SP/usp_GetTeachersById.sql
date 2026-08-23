@@ -1,8 +1,8 @@
 CREATE OR ALTER PROCEDURE [dbo].[usp_GetTeachersById]
-	@Id bigint
+	@TeacherGuid uniqueidentifier
 AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT * FROM [dbo].[Teachers] WHERE Id = @Id;
+	SELECT * FROM [dbo].[Teachers] WHERE TeacherGuid = @TeacherGuid;
 END

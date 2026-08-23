@@ -9,5 +9,6 @@ namespace DataAccessLayer.DataAccess
 		Classes GetClassesById(Guid classGuid);
 		void DeleteClassesById(long id);
 		void UpdateClassesById(Classes classes);
-	}
+		List<Classes> GetAllActiveClasses();
+    }
 }
