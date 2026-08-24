@@ -10,5 +10,6 @@ namespace DataAccessLayer.DataAccess
 		void DeleteClassesById(long id);
 		void UpdateClassesById(Classes classes);
 		List<Classes> GetAllActiveClasses();
+		List<Classes> GetAllActiveClassesForATeacher(Guid teacherGuid);
     }
 }

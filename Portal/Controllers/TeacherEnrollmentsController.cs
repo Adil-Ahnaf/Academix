@@ -25,16 +25,16 @@ namespace Portal.Controllers
             _hostingEnvironment = hostingEnvironment;
         }
 
-        [HttpGet("Enrollments/{teacherGuid?}")]
-        public IActionResult Index(Guid? teacherGuid)
+        [HttpGet("Enrollments/{teacherGuid:guid}")]
+        public IActionResult Index(Guid teacherGuid)
         {
-            var model = new TeacherEnrollmentsViewModel();
-            if (teacherGuid.HasValue)
+            var model = new TeacherEnrollmentsViewModel
             {
-                model.Teacher = _teachersData.GetTeachersById(teacherGuid.Value);
-                model.TeacherEnrollmentsList = _teacherEnrollmentsData.GetATeacherAllEnrollments(teacherGuid.Value);
-            }
-            model.ClassesList = _classesData.GetAllActiveClasses();
+                Teacher = _teachersData.GetTeachersById(teacherGuid),
+                TeacherEnrollmentsList = _teacherEnrollmentsData.GetATeacherAllEnrollments(teacherGuid),
+                ClassesList = _classesData.GetAllActiveClassesForATeacher(teacherGuid)
+            };
+
             return View(model);
         }
 

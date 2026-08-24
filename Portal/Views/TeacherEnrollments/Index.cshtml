@@ -78,7 +78,7 @@
                     }
                     else
                     {
-                        <tr>
+                        <tr class="empty-row">
                             <td colspan="6" class="text-center text-muted py-4">
                                 No enrolled classes found.
                             </td>
@@ -128,8 +128,8 @@
                     }
                     else
                     {
-                        <tr>
-                            <td colspan="4" class="text-center text-muted py-4">
+                        <tr class="empty-row">
+                            <td colspan="6" class="text-center text-muted py-4">
                                 No available classes found.
                             </td>
                         </tr>
@@ -146,40 +146,84 @@
         $(document).on('click', '.enroll-btn', function() {
 
             var button = $(this);
-            var classGuid = button.data('class-guid');
+            var row = button.closest('tr');
+
+            var classGuid = button.attr('data-class-guid');
+            var teacherGuid = $('#teacherGuid').val();
+
+            // Prevent double-click
+            button.prop('disabled', true);
+            button.text('Enrolling...');
+
+            // Remove "No enrolled classes found" row if it exists
+             $('#enrolledClassesTable tbody').find('.empty-row').remove();
 
             $.ajax({
                 url: '@Url.Action("Insert", "TeacherEnrollments")',
                 type: 'POST',
                 data: {
                     classGuid: classGuid,
-                    teacherGuid: $('#teacherGuid').val()    
+                    teacherGuid: teacherGuid,
                 },
                 success: function(response) {
-
                     if (response.success) {
+                        // Change Enroll button to Remove button
+                        button
+                            .removeClass('btn-primary enroll-btn')
+                            .addClass('btn-danger remove-btn')
+                            .text('Remove')
+                            .prop('disabled', false);;
 
-                        // Add new class to enrolled table
-                        $('#enrolledClassesTable tbody').append(`
-                                    <tr>
-                                        <td>${response.academicYear}</td>
-                                        <td>${response.className}</td>
-                                        <td>${response.subject}</td>
-                                        <td>${response.section}</td>
-                                        <td>${response.maxCapacity}</td>
-                                    </tr>
-                                `);
+                        /*
+                         * Move the entire row from
+                         * Available Classes -> Enrolled Classes
+                         */
+                        $('#enrolledClassesTable tbody').append(row);
 
-                        // Remove class from available list
-                        button.closest('tr').remove();
+                        /*
+                         * If this was the last available class,
+                         * show the empty message.
+                         */
+                        if ($('#availableClassesTable tbody tr').length === 0) {
+
+                            $('#availableClassesTable tbody').append(`
+                                        <tr class="empty-row">
+                                            <td colspan="6"
+                                                class="text-center text-muted py-4">
+                                                No available classes found.
+                                            </td>
+                                        </tr>
+                                    `);
+                        }
 
                     } else {
-                        alert(response.message);
+
+                        // Server returned success = false
+                        alert(
+                            response.message ||
+                            'Unable to enroll in this class.'
+                        );
+
+                        // Enable button again
+                        button.prop('disabled', false);
+                        button.text('Enroll');
                     }
                 },
+
                 error: function(xhr) {
-                    alert('An error occurred while enrolling the class.');
-                    console.log(xhr.responseText);
+
+                    console.error('AJAX Error');
+                    console.error('Status:', xhr.status);
+                    console.error('Response:', xhr.responseText);
+
+                    alert(
+                        'An error occurred while enrolling the class.\n' +
+                        'HTTP Status: ' + xhr.status
+                    );
+
+                    // Enable button again
+                    button.prop('disabled', false);
+                    button.text('Enroll');
                 }
             });
         });
