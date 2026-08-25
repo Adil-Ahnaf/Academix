@@ -24,7 +24,7 @@ $(document).on('click', '.enroll-btn', function () {
     $('#enrolledClassesTable tbody').find('.empty-row').remove();
 
     $.ajax({
-        url: '@Url.Action("Insert", "TeacherEnrollments")',
+        url: window.teacherEnrollmentUrls.insert,
         type: 'POST',
         data: {
             classGuid: classGuid,
@@ -39,14 +39,6 @@ $(document).on('click', '.enroll-btn', function () {
                     .addClass('btn-danger remove-btn')
                     .text('Remove')
                     .prop('disabled', false);
-
-                // Store enrollment ID if returned by controller
-                if (response.enrollmentId) {
-                    button.attr(
-                        'data-enrollment-id',
-                        response.enrollmentId
-                    );
-                }
 
                 // Move row:
                 $('#enrolledClassesTable tbody').append(row);
@@ -98,6 +90,8 @@ $(document).on('click', '.remove-btn', function () {
     var classGuid = button.attr('data-class-guid');
     var teacherGuid = $('#teacherGuid').val();
 
+    console.log(classGuid);
+
     if (!classGuid || !teacherGuid) {
         alert('Class or teacher information is missing.');
         return;
@@ -111,14 +105,12 @@ $(document).on('click', '.remove-btn', function () {
     $('#availableClassesTable tbody').find('.empty-row').remove();
 
     $.ajax({
-        url: '@Url.Action("Remove", "TeacherEnrollments")',
+        url: window.teacherEnrollmentUrls.delete,
         type: 'POST',
-
         data: {
             classGuid: classGuid,
             teacherGuid: teacherGuid
         },
-
         success: function (response) {
 
             if (response.success) {
@@ -128,9 +120,6 @@ $(document).on('click', '.remove-btn', function () {
                     .addClass('btn-primary enroll-btn')
                     .text('Enroll')
                     .prop('disabled', false);
-
-                // Remove enrollment ID because it no longer exists
-                button.removeAttr('data-enrollment-id');
 
                 // Move row:
                 $('#availableClassesTable tbody').append(row);

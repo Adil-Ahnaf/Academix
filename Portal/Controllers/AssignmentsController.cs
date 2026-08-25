@@ -5,9 +5,11 @@ using BusinessLayer.Services.ExportService;
 using Microsoft.AspNetCore.Mvc;
 using Portal.Extensions;
 using Portal.Models.DatatableModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Portal.Controllers
 {
+	[Authorize]
 	public class AssignmentsController : BaseController
 	{
 		private readonly IAssignmentsData _assignmentsData;

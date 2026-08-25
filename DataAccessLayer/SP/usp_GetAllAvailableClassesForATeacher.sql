@@ -4,8 +4,7 @@ SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
 GO
-CREATE OR ALTER PROCEDURE [dbo].[usp_GetAllActiveClassesForATeacher] 
-	@TeacherGuid uniqueidentifier
+CREATE OR ALTER PROCEDURE [dbo].[usp_GetAllAvailableClassesForATeacher] 
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -17,8 +16,7 @@ BEGIN
 	(
 		SELECT 1
 		FROM [dbo].[TeacherEnrollments] AS E
-		INNER JOIN [dbo].[Teachers] AS T ON T.Id = E.TeacherId
-		WHERE E.ClassId = C.Id AND T.TeacherGuid = @TeacherGuid
+		WHERE E.ClassId = C.Id
 	);
 END
 GO

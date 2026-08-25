@@ -8,9 +8,11 @@ using Portal.Models.DatatableModels;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using BusinessLayer.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Portal.Controllers
 {
+    [Authorize]
     public class TeachersController : BaseController
     {
         private readonly ITeachersData _teachersData;

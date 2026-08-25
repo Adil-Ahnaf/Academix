@@ -26,7 +26,7 @@ namespace DataAccessLayer
 		public static string DeleteClassesById = "usp_DeleteClassesById";
 		public static string UpdateClassesById = "usp_UpdateClassesById";
         public static string GetAllActiveClasses = "usp_GetAllActiveClasses";
-        public static string GetAllActiveClassesForATeacher = "usp_GetAllActiveClassesForATeacher";
+        public static string GetAllAvailableClassesForATeacher = "usp_GetAllAvailableClassesForATeacher";
 
         public static string InsertStudentEnrollments = "usp_InsertStudentEnrollments";
 		public static string GetAllStudentEnrollments = "usp_GetAllStudentEnrollments";
@@ -52,7 +52,7 @@ namespace DataAccessLayer
 		public static string DeleteTeacherEnrollmentsById = "usp_DeleteTeacherEnrollmentsById";
 		public static string UpdateTeacherEnrollmentsById = "usp_UpdateTeacherEnrollmentsById";
         public static string GetATeacherAllEnrollments = "usp_GetATeacherAllEnrollments";
-
+        public static string GetTeacherEnrollmentByClassAndTeacher = "usp_GetTeacherEnrollmentByClassAndTeacher";
 
     }
 }

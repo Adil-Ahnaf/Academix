@@ -7,72 +7,74 @@ using Portal.Extensions;
 using Portal.Models.DatatableModels;
 using Newtonsoft.Json;
 using BusinessLayer.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Portal.Controllers
 {
-	public class StudentEnrollmentsController : BaseController
-	{
-		private readonly IStudentEnrollmentsData _studentEnrollmentsData;
-		private readonly IExportService _exportService;
-		private readonly IWebHostEnvironment _hostingEnvironment;
-		public StudentEnrollmentsController (IStudentEnrollmentsData studentEnrollmentsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
-		{
-			this._studentEnrollmentsData = studentEnrollmentsData;
-			this._exportService = exportService;
-			this._hostingEnvironment = hostingEnvironment;
-		}
+    [Authorize]
+    public class StudentEnrollmentsController : BaseController
+    {
+        private readonly IStudentEnrollmentsData _studentEnrollmentsData;
+        private readonly IExportService _exportService;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        public StudentEnrollmentsController(IStudentEnrollmentsData studentEnrollmentsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
+        {
+            this._studentEnrollmentsData = studentEnrollmentsData;
+            this._exportService = exportService;
+            this._hostingEnvironment = hostingEnvironment;
+        }
 
-		public IActionResult Index()
-		{
-			return View();
-		}
+        public IActionResult Index()
+        {
+            return View();
+        }
 
-		public IActionResult Add()
-		{
-			var model = new StudentEnrollmentsViewModelAdd();
-			return View(model);
-		}
+        public IActionResult Add()
+        {
+            var model = new StudentEnrollmentsViewModelAdd();
+            return View(model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Insert(StudentEnrollmentsViewModelAdd model)
-		{
-            
+        {
+
             long studentEnrollmentsId = _studentEnrollmentsData.InsertStudentEnrollments(new StudentEnrollments()
             {
                 StudentId = model.StudentId,
-				ClassId = model.ClassId,
-				CreatedDate = DateTime.Now,
-				IsActive = true
+                ClassId = model.ClassId,
+                CreatedDate = DateTime.Now,
+                IsActive = true
             });
-			return RedirectToAction("Index", "StudentEnrollments");
-		}
-		public IActionResult Edit(int id)
-		{
+            return RedirectToAction("Index", "StudentEnrollments");
+        }
+        public IActionResult Edit(int id)
+        {
             StudentEnrollmentsViewModelEdit model = new StudentEnrollmentsViewModelEdit();
             var studentEnrollments = _studentEnrollmentsData.GetStudentEnrollmentsById(id);
             if (studentEnrollments != null)
             {
                 model.Id = studentEnrollments.Id;
-				model.StudentId = studentEnrollments.StudentId;
-				model.ClassId = studentEnrollments.ClassId;
-				model.IsActive = studentEnrollments.IsActive;
+                model.StudentId = studentEnrollments.StudentId;
+                model.ClassId = studentEnrollments.ClassId;
+                model.IsActive = studentEnrollments.IsActive;
             }
             return View(model);
-		}
+        }
         [HttpPost]
         public async Task<IActionResult> Update(StudentEnrollmentsViewModelEdit model)
-		{
-            
+        {
+
             _studentEnrollmentsData.UpdateStudentEnrollmentsById(new StudentEnrollments()
             {
                 Id = model.Id,
-				StudentId = model.StudentId,
-				ClassId = model.ClassId,
-				IsActive = model.IsActive,
-				ModifiedDate = DateTime.Now
+                StudentId = model.StudentId,
+                ClassId = model.ClassId,
+                IsActive = model.IsActive,
+                ModifiedDate = DateTime.Now
             });
-			return RedirectToAction("Index", "StudentEnrollments");
-		}
+            return RedirectToAction("Index", "StudentEnrollments");
+        }
         [HttpPost("StudentEnrollments/LoadTable")]
         public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
         {
@@ -93,10 +95,10 @@ namespace Portal.Controllers
             var totalResultsCount = result.Count();
             if (!string.IsNullOrEmpty(searchBy))
             {
-                result = result.Where(r => r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ClassId != null && r.ClassId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                result = result.Where(r => r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ClassId != null && r.ClassId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
             }
 
             result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
@@ -142,10 +144,10 @@ namespace Portal.Controllers
 
             if (!string.IsNullOrEmpty(searchBy))
             {
-                result = result.Where(r => r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ClassId != null && r.ClassId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                result = result.Where(r => r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ClassId != null && r.ClassId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
             }
 
             result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
@@ -173,5 +175,5 @@ namespace Portal.Controllers
 
             return null;
         }
-	}
+    }
 }

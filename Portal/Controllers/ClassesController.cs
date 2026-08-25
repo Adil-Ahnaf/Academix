@@ -2,6 +2,7 @@ using BusinessLayer.Models;
 using BusinessLayer.Services;
 using BusinessLayer.Services.ExportService;
 using DataAccessLayer.DataAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Newtonsoft.Json;
@@ -11,6 +12,7 @@ using Portal.Models.DatatableModels;
 
 namespace Portal.Controllers
 {
+    [Authorize]
     public class ClassesController : BaseController
     {
         private readonly IClassesData _classesData;

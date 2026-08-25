@@ -5,10 +5,12 @@ using BusinessLayer.Services.ExportService;
 using Microsoft.AspNetCore.Mvc;
 using Portal.Extensions;
 using Portal.Models.DatatableModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Portal.Controllers
 {
-	public class SubmissionsController : BaseController
+    [Authorize]
+    public class SubmissionsController : BaseController
 	{
 		private readonly ISubmissionsData _submissionsData;
 		private readonly IExportService _exportService;
