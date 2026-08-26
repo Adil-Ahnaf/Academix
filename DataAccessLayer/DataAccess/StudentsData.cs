@@ -23,9 +23,9 @@ namespace DataAccessLayer.DataAccess
 			return _dataAccess.GetList<Students>(SpConstants.GetAllStudents);
 		}
 
-		public Students GetStudentsById(long id)
+		public Students GetStudentsById(Guid studentGuid)
 		{
-			return _dataAccess.GetSingle<Students>(SpConstants.GetStudentsById, new{ id });
+			return _dataAccess.GetSingle<Students>(SpConstants.GetStudentsById, new{ studentGuid });
 		}
 
 		public void DeleteStudentsById(long id)

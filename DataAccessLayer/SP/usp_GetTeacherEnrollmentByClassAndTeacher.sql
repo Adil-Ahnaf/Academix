@@ -16,6 +16,6 @@ BEGIN
 	FROM [dbo].[TeacherEnrollments] AS E
 	INNER JOIN [dbo].[Classes] AS C ON C.Id = E.ClassId
 	INNER JOIN [dbo].[Teachers] AS T ON T.Id = E.TeacherId
-	WHERE E.IsActive = 1;
+	WHERE E.IsActive = 1 AND C.ClassGuid = @ClassGuid AND T.TeacherGuid = @TeacherGuid;
 END
 GO

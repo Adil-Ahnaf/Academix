@@ -9,5 +9,7 @@ namespace DataAccessLayer.DataAccess
 		StudentEnrollments GetStudentEnrollmentsById(long id);
 		void DeleteStudentEnrollmentsById(long id);
 		void UpdateStudentEnrollmentsById(StudentEnrollments studentenrollments);
-	}
+        List<Classes> GetAStudentAllEnrollments(Guid studentGuid);
+        StudentEnrollments GetStudentEnrollmentByClassAndStudent(Guid classGuid, Guid studentGuid);
+    }
 }

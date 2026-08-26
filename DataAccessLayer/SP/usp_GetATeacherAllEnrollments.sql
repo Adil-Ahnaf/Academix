@@ -10,10 +10,11 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-    SELECT C.* 
+    SELECT C.*, S.Name AS SubjectName
 	FROM [dbo].[TeacherEnrollments] AS E
 	INNER JOIN [dbo].[Teachers] AS T ON T.Id = E.TeacherId
 	INNER JOIN [dbo].[Classes] AS C ON C.Id = E.ClassId
+	INNER JOIN [dbo].[Subjects] AS S ON S.Id = C.SubjectId
 	WHERE T.TeacherGuid = @TeacherGuid AND C.IsActive = 1;
 END
 GO

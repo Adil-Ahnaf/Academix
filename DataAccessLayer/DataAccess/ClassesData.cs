@@ -47,5 +47,10 @@ namespace DataAccessLayer.DataAccess
         {
             return _dataAccess.GetList<Classes>(SpConstants.GetAllAvailableClassesForATeacher);
         }
+
+        public List<Classes> GetAllAvailableClassesForAStudent(Guid studentGuid)
+        {
+            return _dataAccess.GetList<Classes>(SpConstants.GetAllAvailableClassesForAStudent, new { studentGuid });
+        }
     }
 }

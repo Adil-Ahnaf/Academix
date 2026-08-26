@@ -24,7 +24,7 @@ namespace Portal.Controllers
             _classesData = classesData;
         }
         
-        [HttpGet("Enrollments/{teacherGuid:guid}")]
+        [HttpGet("TeacherEnrollments/{teacherGuid:guid}")]
         public IActionResult Index(Guid teacherGuid)
         {
             var model = new TeacherEnrollmentsViewModel

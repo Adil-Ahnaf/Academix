@@ -11,5 +11,6 @@ namespace DataAccessLayer.DataAccess
 		void UpdateClassesById(Classes classes);
 		List<Classes> GetAllActiveClasses();
 		List<Classes> GetAllAvailableClassesForATeacher();
+		List<Classes> GetAllAvailableClassesForAStudent(Guid studentGuid);
     }
 }

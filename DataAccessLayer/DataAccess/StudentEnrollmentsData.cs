@@ -38,5 +38,15 @@ namespace DataAccessLayer.DataAccess
 			_dataAccess.Execute(SpConstants.UpdateStudentEnrollmentsById, new{ studentenrollments.Id, studentenrollments.StudentId, studentenrollments.ClassId, studentenrollments.ModifiedDate, studentenrollments.IsActive });
 		}
 
-	}
+        public List<Classes> GetAStudentAllEnrollments(Guid studentGuid)
+        {
+            return _dataAccess.GetList<Classes>(SpConstants.GetAStudentAllEnrollments, new { studentGuid });
+        }
+		
+        public StudentEnrollments GetStudentEnrollmentByClassAndStudent(Guid classGuid, Guid studentGuid)
+        {
+            return _dataAccess.GetSingle<StudentEnrollments>(SpConstants.GetStudentEnrollmentByClassAndStudent, new { classGuid, studentGuid });
+        }
+
+    }
 }

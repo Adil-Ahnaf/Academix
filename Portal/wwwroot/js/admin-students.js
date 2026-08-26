@@ -2,7 +2,7 @@ var table;
 
 $(document).ready(function () {
 
-    table = $("#teachers_table").DataTable({
+    table = $("#students_table").DataTable({
 
         stateSave: true,
         autoWidth: true,
@@ -17,7 +17,7 @@ $(document).ready(function () {
         searching: true,
 
         ajax: {
-            url: "/Teachers/LoadTable",
+            url: "/Students/LoadTable",
             type: "POST",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -37,12 +37,12 @@ $(document).ready(function () {
 
         columns: [
             {
-                data: "fullName",
-                name: "fullName"
+                data: "studentCode",
+                name: "studentCode"
             },
             {
-                data: "department",
-                name: "department"
+                data: "fullName",
+                name: "fullName"
             },
             {
                 data: "gender",
@@ -65,7 +65,7 @@ $(document).ready(function () {
                 render: function (data, type, row) {
                     return `
                         <a class="btn btn-sm btn-primary"
-                           href="/TeacherEnrollments/${row.teacherGuid}">
+                           href="/StudentEnrollments/${row.studentGuid}">
                             Enrollments
                         </a>`;
                 }

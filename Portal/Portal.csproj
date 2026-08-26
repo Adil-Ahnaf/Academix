@@ -21,6 +21,8 @@
     <Folder Include="Extensions\" />
     <Folder Include="Models\DatatableModels\" />
     <Folder Include="Views\Classes\" />
+    <Folder Include="Views\StudentEnrollments\" />
+    <Folder Include="Views\Students\" />
     <Folder Include="wwwroot\lib\bootstrap\dist\" />
   </ItemGroup>
 
