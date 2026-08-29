@@ -16,7 +16,7 @@ BEGIN
 	-- Set decleared variables value
 	SELECT @MaximumCapacity = MaxCapacity FROM [dbo].[Classes] WHERE ClassGuid = @ClassGuid;
 
-	SELECT @EnrolledStudent = COUNT(*) OVER (PARTITION BY ClassID)
+	SELECT @EnrolledStudent = COUNT(E.ClassId)
 	FROM [dbo].[StudentEnrollments] AS E
 	INNER JOIN [dbo].[Classes] AS C ON C.Id = E.ClassId
 	WHERE C.ClassGuid = @ClassGuid;

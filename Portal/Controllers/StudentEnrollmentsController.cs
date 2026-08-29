@@ -41,7 +41,7 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Insert(Guid classGuid, Guid studentGuid)
         {
-            bool enrollAccess = _studentEnrollmentsData.CheckAStudentClassEnrollCapacity(classGuid, studentGuid);
+            bool enrollAccess = _studentEnrollmentsData.CheckAStudentClassEnrollCapacity(classGuid);
 
             if (!enrollAccess)
             {
@@ -83,26 +83,29 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(Guid classGuid, Guid studentGuid)
         {
-            var class_data = _classesData.GetClassesById(classGuid);
-            var student_data = _studentsData.GetStudentsById(studentGuid);
-
             var enrollment = _studentEnrollmentsData.GetStudentEnrollmentByClassAndStudent(classGuid, studentGuid);
             if (enrollment == null)
             {
                 return Json(new { success = false, message = "Enrollment not found." });
             }
-
-            _studentEnrollmentsData.DeleteStudentEnrollmentsById(enrollment.Id);
-
-            return Json(new
+            else
             {
-                success = true,
-                academicYear = class_data.AcademicYear,
-                className = class_data.ClassName,
-                subject = class_data.SubjectName,
-                section = class_data.Section,
-                maxCapacity = class_data.MaxCapacity
-            });
+                var enrolledClass = _classesData.GetStudentEnrollClassDetailsByEnrollmentId(enrollment.Id);
+
+                _studentEnrollmentsData.DeleteStudentEnrollmentsById(enrollment.Id);
+
+                return Json(new
+                {
+                    success = true,
+                    classGuid = enrolledClass.ClassGuid,
+                    academicYear = enrolledClass.AcademicYear,
+                    className = enrolledClass.ClassName,
+                    subject = enrolledClass.SubjectName,
+                    section = enrolledClass.Section,
+                    maxCapacity = enrolledClass.MaxCapacity,
+                    totalEnrolled = enrolledClass.TotalEnrolled > 1 ? enrolledClass.TotalEnrolled - 1 : 0,
+                });
+            }
         }
     }
 }

@@ -5,7 +5,7 @@ GO
 SET QUOTED_IDENTIFIER ON
 GO
 CREATE OR ALTER PROCEDURE [dbo].[usp_GetStudentEnrollClassDetailsByEnrollmentId]
-	@Id BIGINT
+	@EnrollmentId BIGINT
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -20,7 +20,7 @@ BEGIN
 	INNER JOIN [dbo].[Classes] AS C ON C.Id = E.ClassId
 	INNER JOIN [dbo].[Subjects] AS S ON S.Id = C.SubjectId
 	INNER JOIN #ClassEnrollment AS CE ON CE.ClassId = C.Id
-	WHERE E.Id = @Id;
+	WHERE E.Id = @EnrollmentId;
 
 	DROP TABLE #ClassEnrollment;
 END

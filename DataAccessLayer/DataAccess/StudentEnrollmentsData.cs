@@ -48,9 +48,9 @@ namespace DataAccessLayer.DataAccess
             return _dataAccess.GetSingle<StudentEnrollments>(SpConstants.GetStudentEnrollmentByClassAndStudent, new { classGuid, studentGuid });
         }
 
-        public bool CheckAStudentClassEnrollCapacity(Guid classGuid, Guid studentGuid)
+        public bool CheckAStudentClassEnrollCapacity(Guid classGuid)
 		{
-            return _dataAccess.GetSingle<bool>(SpConstants.CheckAStudentClassEnrollCapacity, new { classGuid, studentGuid });
+            return _dataAccess.GetSingle<bool>(SpConstants.CheckAStudentClassEnrollCapacity, new { classGuid });
         }
     }
 }

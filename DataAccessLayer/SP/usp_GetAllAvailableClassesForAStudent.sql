@@ -18,7 +18,7 @@ BEGIN
 	SELECT C.ClassGuid, C.AcademicYear, C.ClassName, S.Name AS SubjectName, C.Section, C.MaxCapacity, CE.TotalEnrolled
 	FROM [dbo].[Classes] AS C
 	INNER JOIN [dbo].[Subjects] AS S ON S.Id = C.SubjectId
-	INNER JOIN #ClassEnrollment AS CE ON CE.ClassId = C.Id
+	LEFT JOIN #ClassEnrollment AS CE ON CE.ClassId = C.Id
 	WHERE C.IsActive = 1 AND NOT EXISTS 
 	(
 		SELECT 1

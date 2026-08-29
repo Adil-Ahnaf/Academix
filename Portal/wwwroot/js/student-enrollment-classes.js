@@ -21,14 +21,6 @@ $(document).on('click', '.enroll-btn', function () {
     // Show loading
     $('#enrollmentLoading').removeClass('d-none');
 
-    // Get row data
-    var academicYear = row.find('td:eq(0)').text().trim();
-    var className = row.find('td:eq(1)').text().trim();
-    var subjectName = row.find('td:eq(2)').text().trim();
-    var section = row.find('td:eq(3)').text().trim();
-    var maxCapacity = row.find('td:eq(4)').text().trim();
-    var totalEnrolled = row.find('td:eq(5)').text().trim();
-
     var ajaxCompleted = false;
     var ajaxSuccess = false;
     var ajaxResponse = null;
@@ -63,6 +55,16 @@ $(document).on('click', '.enroll-btn', function () {
                 // Remove empty row
                 $('#enrolledClassesTable tbody .empty-row').remove();
 
+                // Get enrolled class data from controller JSON
+                var academicYear = ajaxResponse.academicYear;
+                var className = ajaxResponse.className;
+                var subjectName = ajaxResponse.subject;
+                var section = ajaxResponse.section;
+                var maxCapacity = ajaxResponse.maxCapacity;
+                var totalEnrolled = ajaxResponse.totalEnrolled;
+                var enrolledClassGuid = ajaxResponse.classGuid;
+
+
                 // Create enrolled row
                 var enrolledRow = `
                     <tr>
@@ -75,7 +77,7 @@ $(document).on('click', '.enroll-btn', function () {
                         <td>
                             <button type="button"
                                     class="btn btn-sm btn-danger remove-btn"
-                                    data-class-guid="${classGuid}">
+                                    data-class-guid="${enrolledClassGuid}">
                                 Remove
                             </button>
                         </td>
@@ -100,12 +102,6 @@ $(document).on('click', '.enroll-btn', function () {
                         </tr>
                     `);
                 }
-
-                alert(
-                    ajaxResponse.message ||
-                    'Class enrolled successfully.'
-                );
-
             }
             else {
 
@@ -121,5 +117,131 @@ $(document).on('click', '.enroll-btn', function () {
             $('#enrollmentLoading').addClass('d-none');
 
         }
-    }, 2000);
+    }, 1000);
+});
+
+// ============================================================
+// REMOVE CLASS
+// Enrolled Classes -> Available Classes
+// ============================================================
+
+$(document).on('click', '.remove-btn', function () {
+
+    var button = $(this);
+    var row = button.closest('tr');
+
+    var studentGuid = $('#studentGuid').val();
+    var classGuid = button.attr('data-class-guid');
+
+    // Prevent double click
+    if (button.prop('disabled')) {
+        return;
+    }
+
+    button.prop('disabled', true);
+
+    // Show loading
+    $('#enrollmentRemoving').removeClass('d-none');
+
+    var ajaxCompleted = false;
+    var ajaxSuccess = false;
+    var ajaxResponse = null;
+
+    // Start AJAX immediately
+    $.ajax({
+        url: window.studentEnrollmentUrls.delete,
+        type: 'POST',
+        data: {
+            classGuid: classGuid,
+            studentGuid: studentGuid
+        },
+
+        success: function (response) {
+
+            ajaxCompleted = true;
+            ajaxSuccess = true;
+            ajaxResponse = response;
+        },
+
+        error: function (xhr) {
+
+            ajaxCompleted = true;
+            ajaxSuccess = false;
+
+            console.error(xhr);
+        }
+    });
+
+    // Keep loading for minimum 1 second
+    setTimeout(function () {
+
+        if (ajaxCompleted) {
+
+            if (ajaxSuccess && ajaxResponse.success) {
+
+                // Remove empty row
+                $('#availableClassesTable tbody .empty-row').remove();
+
+                // Get available class data from controller JSON
+                var academicYear = ajaxResponse.academicYear;
+                var className = ajaxResponse.className;
+                var subjectName = ajaxResponse.subject;
+                var section = ajaxResponse.section;
+                var maxCapacity = ajaxResponse.maxCapacity;
+                var totalEnrolled = ajaxResponse.totalEnrolled;
+                var availableClassGuid = ajaxResponse.classGuid;
+
+                // Create available class row
+                var availableRow = `
+                    <tr>
+                        <td>${academicYear}</td>
+                        <td>${className}</td>
+                        <td>${subjectName}</td>
+                        <td>${section}</td>
+                        <td>${maxCapacity}</td>
+                        <td>${totalEnrolled}</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-sm btn-primary enroll-btn"
+                                    data-class-guid="${availableClassGuid}">
+                                Enroll
+                            </button>
+                        </td>
+                    </tr>
+                `;
+
+                // Add to available table
+                $('#availableClassesTable tbody').append(availableRow);
+
+                // Remove from enrolled table
+                row.remove();
+
+                // Check if enrolled table is empty
+                if ($('#enrolledClassesTable tbody tr').length === 0) {
+
+                    $('#enrolledClassesTable tbody').append(`
+                        <tr class="empty-row">
+                            <td colspan="7"
+                                class="text-center text-muted py-4">
+                                No enrolled classes found.
+                            </td>
+                        </tr>
+                    `);
+                }
+            }
+            else {
+
+                alert(
+                    (ajaxResponse && ajaxResponse.message) ||
+                    'Unable to remove this class.'
+                );
+
+                button.prop('disabled', false);
+            }
+
+            // Hide loading
+            $('#enrollmentRemoving').addClass('d-none');
+        }
+
+    }, 1000);
 });
