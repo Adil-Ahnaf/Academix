@@ -11,5 +11,6 @@ namespace DataAccessLayer.DataAccess
 		void UpdateStudentEnrollmentsById(StudentEnrollments studentenrollments);
         List<Classes> GetAStudentAllEnrollments(Guid studentGuid);
         StudentEnrollments GetStudentEnrollmentByClassAndStudent(Guid classGuid, Guid studentGuid);
+		bool CheckAStudentClassEnrollCapacity(Guid classGuid, Guid studentGuid);
     }
 }

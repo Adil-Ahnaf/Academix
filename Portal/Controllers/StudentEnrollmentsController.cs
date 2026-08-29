@@ -41,26 +41,43 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Insert(Guid classGuid, Guid studentGuid)
         {
-            var class_data = _classesData.GetClassesById(classGuid);
-            var student_data = _studentsData.GetStudentsById(studentGuid);
+            bool enrollAccess = _studentEnrollmentsData.CheckAStudentClassEnrollCapacity(classGuid, studentGuid);
 
-            long studentEnrollmentsId = _studentEnrollmentsData.InsertStudentEnrollments(new StudentEnrollments()
+            if (!enrollAccess)
             {
-                StudentId = student_data.Id,
-                ClassId = class_data.Id,
-                CreatedDate = DateTime.Now,
-                IsActive = true
-            });
+                return Json(new 
+                { 
+                    success = false, 
+                    message = "Enrollment failed. The class has reached its maximum capacity." 
+                });
+            }
+            else
+            {
+                long classId = _classesData.GetClassesById(classGuid).Id;
+                long studentId = _studentsData.GetStudentsById(studentGuid).Id;
 
-            return Json(new
-            {
-                success = true,
-                academicYear = class_data.AcademicYear,
-                className = class_data.ClassName,
-                subject = class_data.SubjectName,
-                section = class_data.Section,
-                maxCapacity = class_data.MaxCapacity
-            });
+                long studentEnrollmentsId = _studentEnrollmentsData.InsertStudentEnrollments(new StudentEnrollments()
+                {
+                    StudentId = studentId,
+                    ClassId = classId,
+                    CreatedDate = DateTime.Now,
+                    IsActive = true
+                });
+
+                var enrolledClass = _classesData.GetStudentEnrollClassDetailsByEnrollmentId(studentEnrollmentsId);
+
+                return Json(new
+                {
+                    success = true,
+                    classGuid = enrolledClass.ClassGuid,
+                    academicYear = enrolledClass.AcademicYear,
+                    className = enrolledClass.ClassName,
+                    subject = enrolledClass.SubjectName,
+                    section = enrolledClass.Section,
+                    maxCapacity = enrolledClass.MaxCapacity,
+                    totalEnrolled = enrolledClass.TotalEnrolled
+                });
+            }
         }
 
         [HttpPost]

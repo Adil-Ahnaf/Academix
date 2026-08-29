@@ -17,7 +17,9 @@ namespace BusinessLayer.Models
 		public string AcademicYear { get; set; }
 		[Display(Name = "Max Capacity")]
 		public int MaxCapacity { get; set; }
-		[Display(Name = "Class Guid")]
+        [Display(Name = "Total Enrolled")]
+        public int TotalEnrolled { get; set; }
+        [Display(Name = "Class Guid")]
 		public Guid ClassGuid { get; set; }
 		[Display(Name = "Created Date")]
 		public DateTime? CreatedDate { get; set; }

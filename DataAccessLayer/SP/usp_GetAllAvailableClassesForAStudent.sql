@@ -10,9 +10,15 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT C.*, S.Name AS SubjectName
+	-- Store total enrollment for each class in temporary table
+	SELECT DISTINCT ClassId, COUNT(*) OVER (PARTITION BY ClassId) AS TotalEnrolled
+	INTO #ClassEnrollment
+	FROM [dbo].[StudentEnrollments];
+
+	SELECT C.ClassGuid, C.AcademicYear, C.ClassName, S.Name AS SubjectName, C.Section, C.MaxCapacity, CE.TotalEnrolled
 	FROM [dbo].[Classes] AS C
 	INNER JOIN [dbo].[Subjects] AS S ON S.Id = C.SubjectId
+	INNER JOIN #ClassEnrollment AS CE ON CE.ClassId = C.Id
 	WHERE C.IsActive = 1 AND NOT EXISTS 
 	(
 		SELECT 1
@@ -20,5 +26,7 @@ BEGIN
 		INNER JOIN [dbo].[Students] AS ST ON ST.Id = E.StudentId
 		WHERE E.ClassId = C.Id AND ST.StudentGuid = @StudentGuid
 	);
+
+	DROP TABLE #ClassEnrollment;
 END
 GO
