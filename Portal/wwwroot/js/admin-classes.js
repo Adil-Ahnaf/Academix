@@ -57,6 +57,10 @@ $(document).ready(function () {
                 name: "MaxCapacity"
             },
             {
+                data: "totalEnrolled",
+                name: "totalEnrolled"
+            },
+            {
                 data: "isActive",
                 name: "IsActive",
                 render: function (data) {

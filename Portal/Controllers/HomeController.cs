@@ -138,6 +138,12 @@ namespace Portal.Controllers
 
                     ||
 
+                    r.TotalEnrolled
+                        .ToString()
+                        .Contains(search)
+
+                    ||
+
                     r.IsActive
                         .ToString()
                         .Contains(

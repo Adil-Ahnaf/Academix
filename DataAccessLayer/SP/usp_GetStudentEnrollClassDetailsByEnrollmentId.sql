@@ -11,9 +11,10 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Store total enrollment for each class in temporary table
-	SELECT DISTINCT ClassId, COUNT(*) OVER (PARTITION BY ClassId) AS TotalEnrolled
+	SELECT ClassId, COUNT(*) AS TotalEnrolled
 	INTO #ClassEnrollment
-	FROM [dbo].[StudentEnrollments];
+	FROM [dbo].[StudentEnrollments]
+	GROUP BY ClassId;
 
 	SELECT C.ClassGuid, C.AcademicYear, C.ClassName, S.Name AS SubjectName, C.Section, C.MaxCapacity, CE.TotalEnrolled 
 	FROM [dbo].[StudentEnrollments] AS E
