@@ -4,5 +4,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT * FROM [dbo].[Classes] WHERE ClassGuid = @ClassGuid;
+	SELECT C.*, S.Name AS SubjectName
+	FROM [dbo].[Classes] AS C
+	INNER JOIN [dbo].[Subjects] AS S ON S.Id = C.SubjectId
+	WHERE ClassGuid = @ClassGuid;
 END

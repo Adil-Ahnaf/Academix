@@ -2,7 +2,7 @@ var table;
 
 $(document).ready(function () {
 
-    table = $("#classes_table").DataTable({
+    table = $("#students_table").DataTable({
 
         stateSave: true,
         autoWidth: true,
@@ -17,12 +17,13 @@ $(document).ready(function () {
         searching: true,
 
         ajax: {
-            url: "/Home/LoadTable",
+            url: "/Classes/LoadTable",
             type: "POST",
             contentType: "application/json; charset=utf-8",
             dataType: "json",
 
             data: function (d) {
+                d.classGuid = $('#classGuid').val();
                 return JSON.stringify(d);
             },
 
@@ -37,28 +38,16 @@ $(document).ready(function () {
 
         columns: [
             {
-                data: "academicYear",
-                name: "AcademicYear"
+                data: "studentCode",
+                name: "studentCode"
             },
             {
-                data: "className",
-                name: "ClassName"
+                data: "fullName",
+                name: "fullName"
             },
             {
-                data: "subjectName",
-                name: "SubjectName"
-            },
-            {
-                data: "section",
-                name: "Section"
-            },
-            {
-                data: "maxCapacity",
-                name: "MaxCapacity"
-            },
-            {
-                data: "totalEnrolled",
-                name: "totalEnrolled"
+                data: "gender",
+                name: "gender"
             },
             {
                 data: "isActive",
@@ -67,23 +56,6 @@ $(document).ready(function () {
                     return data
                         ? '<span class="badge bg-success">Active</span>'
                         : '<span class="badge bg-danger">Inactive</span>';
-                }
-            },
-            {
-                data: null,
-                name: "Actions",
-                orderable: false,
-                searchable: false,
-                render: function (data, type, row) {
-                    return `
-                        <a class="btn btn-sm btn-primary"
-                           href="/Classes/Edit/${row.classGuid}">
-                            Edit
-                        </a>
-                         <a class="btn btn-sm btn-warning text-white"
-                           href="/Classes/EnrollmentDetails/${row.classGuid}">
-                            Details
-                        </a>`;
                 }
             }
         ],

@@ -17,11 +17,16 @@ namespace Portal.Controllers
     {
         private readonly IClassesData _classesData;
         private readonly ISubjectsData _subjectsData;
+        private readonly ITeachersData _teachersData;
+        private readonly IStudentsData _studentsData;
 
-        public ClassesController(IClassesData classesData, ISubjectsData subjectsData)
+        public ClassesController(IClassesData classesData, ISubjectsData subjectsData, ITeachersData teachersData, 
+            IStudentsData studentsData)
         {
             _classesData = classesData;
             _subjectsData = subjectsData;
+            _teachersData = teachersData;
+            _studentsData = studentsData;
         }
 
         public IActionResult Index()
@@ -91,6 +96,16 @@ namespace Portal.Controllers
             });
             return RedirectToAction("Index", "Home");
         }
+        [Route("Classes/EnrollmentDetails/{classGuid:guid}")]
+        public async Task<IActionResult> EnrollmentDetails(Guid classGuid)
+        {
+            var model = new EnrollmentDetailsViewModel
+            {
+                EnrolledTeacher = _teachersData.GetEnrolledTeacherByClassGuid(classGuid),
+                EnrolledClass = _classesData.GetClassesById(classGuid)
+            };
+            return View(model);
+        }
         private SelectList GetSubjectList()
         {
             var subjectList = _subjectsData.GetAllSubjects();
@@ -102,6 +117,104 @@ namespace Portal.Controllers
             }
             var selectList = new SelectList(selectListItems, "Value", "Text", 1);
             return selectList;
+        }
+        public IActionResult LoadTable([FromBody] DtParameters? dtParameters)
+        {
+            if (dtParameters == null)
+            {
+                return BadRequest(new
+                {
+                    error = "DataTables parameters are null."
+                });
+            }
+
+            Guid? classGuid = dtParameters?.ClassGuid;
+            string? searchBy = dtParameters.Search?.Value;
+            string orderCriteria = "Id";
+            bool orderAscendingDirection = true;
+
+            if (dtParameters.Order != null && dtParameters.Order.Length > 0 && dtParameters.Columns != null)
+            {
+                int columnIndex = dtParameters.Order[0].Column;
+
+                if (columnIndex >= 0 && columnIndex < dtParameters.Columns.Length)
+                {
+                    string? requestedColumn = dtParameters.Columns[columnIndex].Data;
+
+                    if (!string.IsNullOrWhiteSpace(requestedColumn))
+                    {
+                        orderCriteria = requestedColumn;
+                    }
+                }
+                orderAscendingDirection = !string.Equals(dtParameters.Order[0].Dir, "desc", StringComparison.OrdinalIgnoreCase);
+            }
+
+            var result = _studentsData.GetEnrolledStudentsByClassGuid(classGuid.Value).AsQueryable();
+
+            int totalResultsCount = result.Count();
+
+            if (!string.IsNullOrWhiteSpace(searchBy))
+            {
+                string search = searchBy.Trim();
+
+                result = result.Where(r =>
+                    (r.StudentCode != null &&
+                     r.StudentCode.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    (r.FullName != null &&
+                     r.FullName.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    (r.Gender != null &&
+                     r.Gender.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            result = orderAscendingDirection
+                ? result.OrderByDynamic(
+                    orderCriteria,
+                    DtOrderDir.Asc)
+
+                : result.OrderByDynamic(
+                    orderCriteria,
+                    DtOrderDir.Desc);
+
+            int filteredResultsCount = result.Count();
+
+            int start = Math.Max(
+                dtParameters.Start,
+                0);
+
+            int length = dtParameters.Length;
+
+
+            if (length <= 0)
+            {
+                length = 10;
+            }
+
+
+            var data = result
+                .Skip(start)
+                .Take(length)
+                .ToList();
+
+            return Json(new DtResult<Students>
+            {
+                Draw = dtParameters.Draw,
+                RecordsTotal = totalResultsCount,
+                RecordsFiltered = filteredResultsCount,
+                Data = data
+            });
         }
     }
 }

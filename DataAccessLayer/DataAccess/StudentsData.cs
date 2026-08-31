@@ -37,6 +37,9 @@ namespace DataAccessLayer.DataAccess
 		{
 			_dataAccess.Execute(SpConstants.UpdateStudentsById, new{ students.Id, students.AspNetUserId, students.StudentCode, students.FullName, students.Gender, students.StudentGuid, students.ModifiedDate, students.ModifiedBy, students.IsActive });
 		}
-
-	}
+        public List<Students> GetEnrolledStudentsByClassGuid(Guid classGuid)
+        {
+            return _dataAccess.GetList<Students>(SpConstants.GetEnrolledStudentsByClassGuid, new { classGuid });
+        }
+    }
 }

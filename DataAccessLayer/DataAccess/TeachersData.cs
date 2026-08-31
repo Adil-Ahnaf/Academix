@@ -37,6 +37,9 @@ namespace DataAccessLayer.DataAccess
 		{
 			_dataAccess.Execute(SpConstants.UpdateTeachersById, new{ teachers.Id, teachers.AspNetUserId, teachers.FullName, teachers.Gender, teachers.Department, teachers.ProfileImage, teachers.TeacherGuid, teachers.ModifiedDate, teachers.ModifiedBy, teachers.IsActive });
 		}
-
-	}
+        public Teachers GetEnrolledTeacherByClassGuid(Guid classGuid)
+        {
+            return _dataAccess.GetSingle<Teachers>(SpConstants.GetEnrolledTeacherByClassGuid, new { classGuid });
+        }
+    }
 }
