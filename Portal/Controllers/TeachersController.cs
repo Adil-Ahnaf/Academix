@@ -27,6 +27,20 @@ namespace Portal.Controllers
             return View();
         }
 
+        public IActionResult TeacherDashboard()
+        {
+            var teacher = _teachersData.GetTeacherByAspNetUserId(UserGuid);
+            if (teacher == null)
+            {
+                return NotFound();
+            }
+            TeacherDashboardViewModel model = new TeacherDashboardViewModel
+            {
+                Teacher = teacher
+            };
+            return View(model);
+        }
+
         public IActionResult LoadTable([FromBody] DtParameters? dtParameters)
         {
             if (dtParameters == null)

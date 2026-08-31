@@ -17,24 +17,27 @@ namespace Portal.Controllers
         private readonly IStudentsData _studentsData;
         private readonly IClassesData _classesData;
         private readonly ISubjectsData _subjectsData;
-        private readonly IExportService _exportService;
 
         public HomeController(ITeachersData teachersData, IStudentsData studentsData, IClassesData classesData,
-            ISubjectsData subjectsData, IExportService exportService)
+            ISubjectsData subjectsData)
         {
             _teachersData = teachersData;
             _studentsData = studentsData;
             _classesData = classesData;
             _subjectsData = subjectsData;
-            _exportService = exportService;
         }
 
         public IActionResult Index()
         {
-            var userName = User.Identity?.Name;
-            ViewBag.UserName = userName;
-
-            if (User.IsInRole("Admin"))
+            if (User.IsInRole("Teacher"))
+            {
+                return RedirectToAction("TeacherDashboard", "Teachers");
+            }
+            else if (User.IsInRole("Student"))
+            {
+                return RedirectToAction("StudentDashboard", "Students");
+            }
+            else
             {
                 AdminDashboardViewModel model = new AdminDashboardViewModel();
                 var teacher = _teachersData.GetAllTeachers();
@@ -49,8 +52,6 @@ namespace Portal.Controllers
 
                 return View(model);
             }
-
-            return View();
         }
 
         public IActionResult Privacy()

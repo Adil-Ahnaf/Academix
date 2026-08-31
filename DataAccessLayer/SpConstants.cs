@@ -8,6 +8,7 @@ namespace DataAccessLayer
         public static string DeleteTeachersById = "usp_DeleteTeachersById";
         public static string UpdateTeachersById = "usp_UpdateTeachersById";
         public static string GetEnrolledTeacherByClassGuid = "usp_GetEnrolledTeacherByClassGuid";
+        public static string GetTeacherByAspNetUserId = "usp_GetTeacherByAspNetUserId";
 
         public static string InsertStudents = "usp_InsertStudents";
         public static string GetAllStudents = "usp_GetAllStudents";

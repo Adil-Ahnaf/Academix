@@ -41,5 +41,11 @@ namespace DataAccessLayer.DataAccess
         {
             return _dataAccess.GetSingle<Teachers>(SpConstants.GetEnrolledTeacherByClassGuid, new { classGuid });
         }
+		
+        public Teachers GetTeacherByAspNetUserId(string aspNetUserId)
+        {
+            return _dataAccess.GetSingle<Teachers>(SpConstants.GetTeacherByAspNetUserId, new { aspNetUserId });
+        }
+
     }
 }

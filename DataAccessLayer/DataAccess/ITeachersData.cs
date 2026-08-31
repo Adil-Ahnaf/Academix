@@ -10,5 +10,6 @@ namespace DataAccessLayer.DataAccess
 		void DeleteTeachersById(long id);
 		void UpdateTeachersById(Teachers teachers);
 		Teachers GetEnrolledTeacherByClassGuid(Guid classGuid);
+		Teachers GetTeacherByAspNetUserId(string aspNetUserId);
 	}
 }
