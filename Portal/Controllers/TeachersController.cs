@@ -16,10 +16,12 @@ namespace Portal.Controllers
     public class TeachersController : BaseController
     {
         private readonly ITeachersData _teachersData;
+        private readonly IClassesData _classesData;
 
-        public TeachersController(ITeachersData teachersData)
+        public TeachersController(ITeachersData teachersData, IClassesData classesData)
         {
             _teachersData = teachersData;
+            _classesData = classesData;
         }
 
         public IActionResult Index()
@@ -36,7 +38,8 @@ namespace Portal.Controllers
             }
             TeacherDashboardViewModel model = new TeacherDashboardViewModel
             {
-                Teacher = teacher
+                Teacher = teacher,
+                AllClasses = _classesData.GetEnrolledClassesByTeacherGuid(teacher.TeacherGuid)
             };
             return View(model);
         }

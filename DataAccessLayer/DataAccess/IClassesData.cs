@@ -13,5 +13,6 @@ namespace DataAccessLayer.DataAccess
 		List<Classes> GetAllAvailableClassesForATeacher();
 		List<Classes> GetAllAvailableClassesForAStudent(Guid studentGuid);
 		Classes GetStudentEnrollClassDetailsByEnrollmentId(long enrollmentId);
+		List<Classes> GetEnrolledClassesByTeacherGuid(Guid teacherGuid);
     }
 }

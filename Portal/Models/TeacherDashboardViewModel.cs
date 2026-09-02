@@ -5,5 +5,6 @@ namespace Portal.Models
     public class TeacherDashboardViewModel
     {
         public Teachers Teacher { get; set; }
+        public List<Classes> AllClasses { get; set; }
     }
 }

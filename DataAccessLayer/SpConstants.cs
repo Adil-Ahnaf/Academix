@@ -32,6 +32,7 @@ namespace DataAccessLayer
         public static string GetAllAvailableClassesForATeacher = "usp_GetAllAvailableClassesForATeacher";
         public static string GetAllAvailableClassesForAStudent = "usp_GetAllAvailableClassesForAStudent";
         public static string GetStudentEnrollClassDetailsByEnrollmentId = "usp_GetStudentEnrollClassDetailsByEnrollmentId";
+        public static string GetEnrolledClassesByTeacherGuid = "usp_GetEnrolledClassesByTeacherGuid";
 
         public static string InsertStudentEnrollments = "usp_InsertStudentEnrollments";
         public static string GetAllStudentEnrollments = "usp_GetAllStudentEnrollments";

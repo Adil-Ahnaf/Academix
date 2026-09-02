@@ -6,19 +6,21 @@ namespace BusinessLayer.Models
 		[Display(Name = "Id")]
 		public long Id { get; set; }
 		[Display(Name = "Class Name")]
-		public string ClassName { get; set; }
+		public string? ClassName { get; set; }
         [Display(Name = "Subject Id")]
         public long SubjectId { get; set; }
         [Display(Name = "Subject Name")]
-        public string SubjectName { get; set; }
+        public string? SubjectName { get; set; }
         [Display(Name = "Section")]
-		public string Section { get; set; }
+		public string? Section { get; set; }
 		[Display(Name = "Academic Year")]
-		public string AcademicYear { get; set; }
+		public string? AcademicYear { get; set; }
 		[Display(Name = "Max Capacity")]
 		public int MaxCapacity { get; set; }
         [Display(Name = "Total Enrolled")]
         public int TotalEnrolled { get; set; }
+        [Display(Name = "Total Assignment")]
+        public int? TotalAssignment { get; set; }
         [Display(Name = "Class Guid")]
 		public Guid ClassGuid { get; set; }
 		[Display(Name = "Created Date")]
