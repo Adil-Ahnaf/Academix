@@ -212,36 +212,52 @@
 
                         </div>
 
-
                         <hr class="my-3">
 
-
                         <!-- Footer -->
-                        <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
 
-                            <span class="text-muted">
-
+                            <!-- Assignment Count -->
+                            <a asp-controller="Assignments" asp-action="Index" asp-route-classGuid="@item.ClassGuid"
+                               class="text-decoration-none text-muted">
                                 <i class="fa-solid fa-file-lines text-warning me-1"></i>
 
-                                @if (item.TotalAssignment == null)
-                                {
-                                    <strong class="text-dark">0</strong>
-                                }
-                                else
-                                {
-                                    <strong class="text-dark">@item.TotalAssignment</strong>
+                                <strong class="text-dark">
+                                    @(item.TotalAssignment ?? 0)
+                                </strong>
 
-                                }
                                 Assignments
-                            </span>
-
-                            <a class="btn btn-sm btn-outline-primary" asp-controller="Classes"
-                               asp-action="EnrollmentDetails" asp-route-classGuid="@item.ClassGuid">
-
-                                Manage Class
-                                <i class="fa-solid fa-arrow-right ms-1"></i>
 
                             </a>
+
+
+                            <!-- Actions -->
+                            <div class="d-flex gap-2">
+
+                                <!-- Add Assignments -->
+                                <a class="btn btn-sm btn-outline-success"
+                                   asp-controller="Assignments"
+                                   asp-action="Add"
+                                   asp-route-classGuid="@item.ClassGuid">
+
+                                    <i class="fa-solid fa-file-lines me-1"></i>
+                                    Add Assignment
+
+                                </a>
+
+
+                                <!-- Manage Class -->
+                                <a class="btn btn-sm btn-primary"
+                                   asp-controller="Classes"
+                                   asp-action="EnrollmentDetails"
+                                   asp-route-classGuid="@item.ClassGuid">
+
+                                    Manage Class
+                                    <i class="fa-solid fa-arrow-right ms-1"></i>
+
+                                </a>
+
+                            </div>
 
                         </div>
 

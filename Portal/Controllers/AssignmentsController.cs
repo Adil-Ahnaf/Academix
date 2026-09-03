@@ -6,88 +6,102 @@ using Microsoft.AspNetCore.Mvc;
 using Portal.Extensions;
 using Portal.Models.DatatableModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 
 namespace Portal.Controllers
 {
-	[Authorize]
-	public class AssignmentsController : BaseController
-	{
-		private readonly IAssignmentsData _assignmentsData;
-		private readonly IExportService _exportService;
-		private readonly IWebHostEnvironment _hostingEnvironment;
-		public AssignmentsController (IAssignmentsData assignmentsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
-		{
-			this._assignmentsData = assignmentsData;
-			this._exportService = exportService;
-			this._hostingEnvironment = hostingEnvironment;
-		}
+    [Authorize]
+    public class AssignmentsController : BaseController
+    {
+        private readonly IAssignmentsData _assignmentsData;
+        private readonly IClassesData _classesData;
+        private readonly IExportService _exportService;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData,
+            IExportService exportService, IWebHostEnvironment hostingEnvironment)
+        {
+            _assignmentsData = assignmentsData;
+            _classesData = classesData;
+            _exportService = exportService;
+            _hostingEnvironment = hostingEnvironment;
+        }
 
-		public IActionResult Index()
-		{
-			return View();
-		}
+        public IActionResult Index()
+        {
+            return View();
+        }
 
-		public IActionResult Add()
-		{
-			var model = new AssignmentsViewModelAdd();
-			return View(model);
-		}
+        [HttpGet("Assignments/All")]
+        public IActionResult TeacherAllAssignments()
+        {
+            return View();
+        }
+
+        [HttpGet("Assignments/Add/{classGuid}")]
+        public IActionResult Add(Guid classGuid)
+        {
+            var model = new AssignmentsViewModelAdd
+            {
+                ClassInfo = _classesData.GetClassesById(classGuid)
+            };
+            return View(model);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Insert(AssignmentsViewModelAdd model)
-		{
-            
+        {
+
             long assignmentsId = _assignmentsData.InsertAssignments(new Assignments()
             {
                 TeacherEnrollmentId = model.TeacherEnrollmentId,
-				Title = model.Title,
-				Description = model.Description,
-				Marks = model.Marks,
-				Deadline = model.Deadline,
-				IsPublish = model.IsPublish,
-				AssignmentGuid = model.AssignmentGuid,
-				CreatedDate = DateTime.Now,
-				IsActive = true
+                Title = model.Title,
+                Description = model.Description,
+                Marks = model.Marks,
+                Deadline = model.Deadline,
+                IsPublish = model.IsPublish,
+                AssignmentGuid = model.AssignmentGuid,
+                CreatedDate = DateTime.Now,
+                IsActive = true
             });
-			return RedirectToAction("Index", "Assignments");
-		}
-		public IActionResult Edit(int id)
-		{
+            return RedirectToAction("Index", "Assignments");
+        }
+        public IActionResult Edit(int id)
+        {
             AssignmentsViewModelEdit model = new AssignmentsViewModelEdit();
             var assignments = _assignmentsData.GetAssignmentsById(id);
             if (assignments != null)
             {
                 model.Id = assignments.Id;
-				model.TeacherEnrollmentId = assignments.TeacherEnrollmentId;
-				model.Title = assignments.Title;
-				model.Description = assignments.Description;
-				model.Marks = assignments.Marks;
-				model.Deadline = assignments.Deadline;
-				model.IsPublish = assignments.IsPublish;
-				model.AssignmentGuid = assignments.AssignmentGuid;
-				model.IsActive = assignments.IsActive;
+                model.TeacherEnrollmentId = assignments.TeacherEnrollmentId;
+                model.Title = assignments.Title;
+                model.Description = assignments.Description;
+                model.Marks = assignments.Marks;
+                model.Deadline = assignments.Deadline;
+                model.IsPublish = assignments.IsPublish;
+                model.AssignmentGuid = assignments.AssignmentGuid;
+                model.IsActive = assignments.IsActive;
             }
             return View(model);
-		}
+        }
         [HttpPost]
         public async Task<IActionResult> Update(AssignmentsViewModelEdit model)
-		{
-            
+        {
+
             _assignmentsData.UpdateAssignmentsById(new Assignments()
             {
                 Id = model.Id,
-				TeacherEnrollmentId = model.TeacherEnrollmentId,
-				Title = model.Title,
-				Description = model.Description,
-				Marks = model.Marks,
-				Deadline = model.Deadline,
-				IsPublish = model.IsPublish,
-				AssignmentGuid = model.AssignmentGuid,
-				IsActive = model.IsActive,
-				ModifiedDate = DateTime.Now
+                TeacherEnrollmentId = model.TeacherEnrollmentId,
+                Title = model.Title,
+                Description = model.Description,
+                Marks = model.Marks,
+                Deadline = model.Deadline,
+                IsPublish = model.IsPublish,
+                AssignmentGuid = model.AssignmentGuid,
+                IsActive = model.IsActive,
+                ModifiedDate = DateTime.Now
             });
-			return RedirectToAction("Index", "Assignments");
-		}
+            return RedirectToAction("Index", "Assignments");
+        }
         [HttpPost("Assignments/LoadTable")]
         public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
         {
@@ -108,15 +122,15 @@ namespace Portal.Controllers
             var totalResultsCount = result.Count();
             if (!string.IsNullOrEmpty(searchBy))
             {
-                result = result.Where(r => r.TeacherEnrollmentId != null && r.TeacherEnrollmentId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.Title != null && r.Title.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.Description != null && r.Description.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.Deadline != null && r.Deadline.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.IsPublish != null && r.IsPublish.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.AssignmentGuid != null && r.AssignmentGuid.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                result = result.Where(r => r.TeacherEnrollmentId != null && r.TeacherEnrollmentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Title != null && r.Title.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Description != null && r.Description.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Deadline != null && r.Deadline.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.IsPublish != null && r.IsPublish.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.AssignmentGuid != null && r.AssignmentGuid.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
             }
 
             result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
@@ -136,5 +150,5 @@ namespace Portal.Controllers
                     .ToList()
             });
         }
-	}
+    }
 }

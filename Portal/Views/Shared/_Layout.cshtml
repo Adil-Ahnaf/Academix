@@ -60,6 +60,20 @@
                                 Assignments
                             </a>
                         }
+                        else if (User.IsInRole("Teacher"))
+                        {
+                            <a class="nav-link" asp-controller="Assignments" asp-action="TeacherAllAssignments">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                                Assignments
+                            </a>
+                        }
+                        else if (User.IsInRole("Student"))
+                        {
+                            <a class="nav-link" asp-controller="Assignments" asp-action="StudentAllAssignments">
+                                <div class="sb-nav-link-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                                Assignments
+                            </a>
+                        }
                     </div>
                 </div>
                 <div class="sb-sidenav-footer">

@@ -1,5 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+using BusinessLayer.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Portal.Models
 {
@@ -19,5 +20,6 @@ namespace Portal.Models
 		public int IsPublish { get; set; }
 		[Display(Name = "Assignment Guid")]
 		public Guid AssignmentGuid { get; set; }
-	}
+        public Classes ClassInfo { get; set; }
+    }
 }

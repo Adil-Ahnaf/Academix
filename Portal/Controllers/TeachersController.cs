@@ -29,6 +29,7 @@ namespace Portal.Controllers
             return View();
         }
 
+        [Route("/TeacherDashboard")]
         public IActionResult TeacherDashboard()
         {
             var teacher = _teachersData.GetTeacherByAspNetUserId(UserGuid);
