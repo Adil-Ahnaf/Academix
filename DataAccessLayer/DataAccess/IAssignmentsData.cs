@@ -9,5 +9,7 @@ namespace DataAccessLayer.DataAccess
 		Assignments GetAssignmentsById(long id);
 		void DeleteAssignmentsById(long id);
 		void UpdateAssignmentsById(Assignments assignments);
-	}
+		List<Assignments> GetAllAssignmentByTeacherAspNetUserId(string aspNetUserId);
+
+    }
 }

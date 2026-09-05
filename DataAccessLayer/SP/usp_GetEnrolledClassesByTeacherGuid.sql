@@ -17,11 +17,10 @@ BEGIN
 	GROUP BY ClassId
 
 	-- Find total assignment assigned of each class
-	SELECT TE.ClassId, COUNT(*) AS TotalAssignment
+	SELECT ClassId, COUNT(*) AS TotalAssignment
 	INTO #AssignAssignment
-	FROM [dbo].[Assignments] AS A
-	INNER JOIN [dbo].[TeacherEnrollments] AS TE ON TE.Id = A.TeacherEnrollmentId
-	GROUP BY TE.ClassId
+	FROM [dbo].[Assignments]
+	GROUP BY ClassId
 
     SELECT C.ClassName, SU.Name AS SubjectName, C.Section, CE.TotalEnrolled, AA.TotalAssignment, C.ClassGuid
 	FROM [dbo].[Teachers] AS T

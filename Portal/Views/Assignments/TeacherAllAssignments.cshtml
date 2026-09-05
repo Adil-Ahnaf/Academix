@@ -1,4 +1,5 @@
-﻿@{
+﻿@model AssignmentsViewModel
+@{
     ViewData["Title"] = "Assignments";
 }
 
@@ -33,13 +34,8 @@
                         align-items-start">
 
                         <div>
-                            <p class="text-muted mb-2 small">
-                                Total Assignments
-                            </p>
-
-                            <h3 class="fw-bold mb-0">
-                                12
-                            </h3>
+                            <p class="text-muted mb-2 small">Total Assignments</p>
+                            <h3 class="fw-bold mb-0">@Model.TotalAssignment</h3>
                         </div>
 
                         <div class="bg-primary bg-opacity-10
@@ -68,13 +64,8 @@
                         align-items-start">
 
                         <div>
-                            <p class="text-muted mb-2 small">
-                                Published
-                            </p>
-
-                            <h3 class="fw-bold mb-0">
-                                8
-                            </h3>
+                            <p class="text-muted mb-2 small">Published</p>
+                            <h3 class="fw-bold mb-0">@Model.PublishedAssignment</h3>
                         </div>
 
                         <div class="bg-success bg-opacity-10
@@ -103,13 +94,8 @@
                         align-items-start">
 
                         <div>
-                            <p class="text-muted mb-2 small">
-                                Drafts
-                            </p>
-
-                            <h3 class="fw-bold mb-0">
-                                4
-                            </h3>
+                            <p class="text-muted mb-2 small">Drafts</p>
+                            <h3 class="fw-bold mb-0">@Model.DraftAssignment</h3>
                         </div>
 
                         <div class="bg-warning bg-opacity-10

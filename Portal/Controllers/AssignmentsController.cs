@@ -36,7 +36,14 @@ namespace Portal.Controllers
         [HttpGet("Assignments/All")]
         public IActionResult TeacherAllAssignments()
         {
-            return View();
+            var model = new AssignmentsViewModel();
+
+            model.AllAssignment = _assignmentsData.GetAllAssignmentByTeacherAspNetUserId(UserGuid);
+            model.TotalAssignment = model.AllAssignment.Count;
+            model.PublishedAssignment = model.AllAssignment.Count(a => a.IsPublish);
+            model.DraftAssignment = model.AllAssignment.Count(a => !a.IsPublish);
+
+            return View(model);
         }
 
         [HttpGet("Assignments/Add/{classGuid}")]
@@ -72,11 +79,9 @@ namespace Portal.Controllers
                 }
             }
 
-            long teacherEnrollmentId = _teacherEnrollmentsData.GetTeacherEnrollmentByClassId(model.ClassId)?.Id ?? 0;
-
             long assignmentsId = _assignmentsData.InsertAssignments(new Assignments()
             {
-                TeacherEnrollmentId = teacherEnrollmentId,
+                ClassId = model.ClassId,
                 Title = model.Title,
                 Description = model.Description,
                 FilePath = filePath,
@@ -145,7 +150,7 @@ namespace Portal.Controllers
             var totalResultsCount = result.Count();
             if (!string.IsNullOrEmpty(searchBy))
             {
-                result = result.Where(r => r.TeacherEnrollmentId != null && r.TeacherEnrollmentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                result = result.Where(r => r.ClassId != null && r.ClassId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
                         r.Title != null && r.Title.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
                         r.Description != null && r.Description.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
                         r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||

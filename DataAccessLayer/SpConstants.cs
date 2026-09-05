@@ -22,6 +22,7 @@ namespace DataAccessLayer
         public static string GetAssignmentsById = "usp_GetAssignmentsById";
         public static string DeleteAssignmentsById = "usp_DeleteAssignmentsById";
         public static string UpdateAssignmentsById = "usp_UpdateAssignmentsById";
+        public static string GetAllAssignmentByTeacherAspNetUserId = "usp_GetAllAssignmentByTeacherAspNetUserId";
 
         public static string InsertClasses = "usp_InsertClasses";
         public static string GetAllClasses = "usp_GetAllClasses";
@@ -62,7 +63,6 @@ namespace DataAccessLayer
         public static string UpdateTeacherEnrollmentsById = "usp_UpdateTeacherEnrollmentsById";
         public static string GetATeacherAllEnrollments = "usp_GetATeacherAllEnrollments";
         public static string GetTeacherEnrollmentByClassAndTeacher = "usp_GetTeacherEnrollmentByClassAndTeacher";
-        public static string GetTeacherEnrollmentByClassId = "usp_GetTeacherEnrollmentByClassId";
 
     }
 }

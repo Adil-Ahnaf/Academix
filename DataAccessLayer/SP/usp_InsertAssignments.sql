@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [dbo].[usp_InsertAssignments]
-	@TeacherEnrollmentId bigint,
+	@ClassId bigint,
 	@Title nvarchar(200),
 	@Description nvarchar(max),
 	@FilePath nvarchar(500),
@@ -12,8 +12,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-    INSERT INTO [dbo].[Assignments](TeacherEnrollmentId, Title, [Description], FilePath, Marks, Deadline, IsPublish, AssignmentGuid, CreatedDate, IsActive)
-	VALUES(@TeacherEnrollmentId, @Title, @Description, @FilePath, @Marks, @Deadline, @IsPublish, NEWID(), @CreatedDate, @IsActive);
+    INSERT INTO [dbo].[Assignments](ClassId, Title, [Description], FilePath, Marks, Deadline, IsPublish, AssignmentGuid, CreatedDate, IsActive)
+	VALUES(@ClassId, @Title, @Description, @FilePath, @Marks, @Deadline, @IsPublish, NEWID(), @CreatedDate, @IsActive);
 
 	SELECT @@IDENTITY;
 END

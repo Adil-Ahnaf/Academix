@@ -5,8 +5,8 @@ namespace BusinessLayer.Models
 	{
 		[Display(Name = "Id")]
 		public long Id { get; set; }
-		[Display(Name = "Teacher Enrollment Id")]
-		public long TeacherEnrollmentId { get; set; }
+		[Display(Name = "Class Id")]
+		public long ClassId { get; set; }
 		[Display(Name = "Title")]
 		public string Title { get; set; }
         [Display(Name = "File Path")]
