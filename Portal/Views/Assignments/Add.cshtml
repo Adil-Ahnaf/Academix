@@ -64,34 +64,71 @@
     <div class="card border-1 shadow-sm mb-4">
         <div class="card-body p-4 p-lg-5">
 
-            <form asp-action="Create" method="post">
+            <form method="post" asp-controller="Assignments" asp-action="Insert" enctype="multipart/form-data">
 
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
+                <div class="d-none">
+                    <input asp-for="ClassName" value="@Model.ClassInfo.ClassName" type="hidden" />
+                    <input asp-for="Section" value="@Model.ClassInfo.Section" type="hidden" />
+                    <input asp-for="ClassId" value="@Model.ClassInfo.Id" type="hidden" />
+                </div>
+                
                 <div class="mb-4">
                     <label asp-for="Title" class="form-label fw-medium">
                         Assignment Title
                         <span class="text-danger">*</span>
                     </label>
-                    <input asp-for="Title" class="form-control" placeholder="e.g. Database Design Assignment" maxlength="200" />
+                    <input asp-for="Title" class="form-control" maxlength="200" />
                     <span asp-validation-for="Title" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-4">
-                    <label asp-for="Description" class="form-label fw-medium">
-                        Description
+                    <label asp-for="FilePath" class="form-label fw-medium">
+                        Assignment File
                         <span class="text-danger">*</span>
                     </label>
-                    <div id="editor" class="form-control" style="height: 300px;">
-                        <textarea asp-for="Description" class="form-control" rows="7"
-                                  placeholder="Describe the assignment requirements, instructions, questions, or other information...">
-                        </textarea>
+
+                    <div class="border rounded-3 p-3 bg-light">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-white border rounded-3 d-flex align-items-center justify-content-center"
+                                     style="width: 48px; height: 48px;">
+                                    <i class="fa-solid fa-file-arrow-up text-primary fs-5"></i>
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <input asp-for="FilePath"
+                                       type="file"
+                                       class="form-control"
+                                       accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" />
+
+                                <div class="form-text">
+                                    Upload the assignment document for students.
+                                    Supported files: PDF, Word, PowerPoint, Excel and TXT.
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span asp-validation-for="Description" class="text-danger small"></span>
+
+                    <span asp-validation-for="FilePath" class="text-danger small"></span>
+                </div>
+
+
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label fw-medium">
+                        Description
+                        <span class="text-muted fw-normal">(Optional)</span>
+                    </label>
+
+                    <textarea asp-for="Description" class="form-control" rows="7"></textarea>
+
                     <div class="form-text">
                         Provide clear instructions for students.
                     </div>
                 </div>
+
 
                 <div class="row g-4">
 
@@ -114,7 +151,7 @@
                             <span class="text-danger">*</span>
                         </label>
 
-                        <input asp-for="Deadline" type="datetime-local" class="form-control" value="@DateTime.Now" />
+                        <input asp-for="Deadline" type="datetime-local" class="form-control" />
                         <span asp-validation-for="Deadline" class="text-danger small"></span>
 
                         <div class="form-text">
@@ -243,12 +280,5 @@
 
 
 @section Scripts {
-    <script src="~/lib/quill-editor/quill.js"></script>
     <partial name="_ValidationScriptsPartial" />
-
-    <script>
-        const quill = new Quill('#editor', {
-            theme: 'snow'
-        });
-    </script>
 }

@@ -15,7 +15,7 @@ namespace DataAccessLayer.DataAccess
 
 		public long InsertAssignments(Assignments assignments)
 		{
-			return _dataAccess.ExecuteScalar<long>(SpConstants.InsertAssignments, new{ assignments.TeacherEnrollmentId, assignments.Title, assignments.Description, assignments.Marks, assignments.Deadline, assignments.IsPublish, assignments.AssignmentGuid, assignments.CreatedDate, assignments.IsActive });
+			return _dataAccess.ExecuteScalar<long>(SpConstants.InsertAssignments, new{ assignments.TeacherEnrollmentId, assignments.Title, assignments.Description, assignments.FilePath, assignments.Marks, assignments.Deadline, assignments.IsPublish, assignments.CreatedDate, assignments.IsActive });
 		}
 
 		public List<Assignments> GetAllAssignments()
@@ -35,7 +35,7 @@ namespace DataAccessLayer.DataAccess
 
 		public void UpdateAssignmentsById(Assignments assignments)
 		{
-			_dataAccess.Execute(SpConstants.UpdateAssignmentsById, new{ assignments.Id, assignments.TeacherEnrollmentId, assignments.Title, assignments.Description, assignments.Marks, assignments.Deadline, assignments.IsPublish, assignments.AssignmentGuid, assignments.ModifiedDate, assignments.IsActive });
+			_dataAccess.Execute(SpConstants.UpdateAssignmentsById, new{ assignments.Id, assignments.TeacherEnrollmentId, assignments.Title, assignments.Description, assignments.FilePath, assignments.Marks, assignments.Deadline, assignments.IsPublish, assignments.AssignmentGuid, assignments.ModifiedDate, assignments.IsActive });
 		}
 
 	}

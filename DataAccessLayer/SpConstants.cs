@@ -62,6 +62,7 @@ namespace DataAccessLayer
         public static string UpdateTeacherEnrollmentsById = "usp_UpdateTeacherEnrollmentsById";
         public static string GetATeacherAllEnrollments = "usp_GetATeacherAllEnrollments";
         public static string GetTeacherEnrollmentByClassAndTeacher = "usp_GetTeacherEnrollmentByClassAndTeacher";
+        public static string GetTeacherEnrollmentByClassId = "usp_GetTeacherEnrollmentByClassId";
 
     }
 }

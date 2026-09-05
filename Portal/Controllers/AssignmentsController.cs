@@ -15,13 +15,15 @@ namespace Portal.Controllers
     {
         private readonly IAssignmentsData _assignmentsData;
         private readonly IClassesData _classesData;
+        private readonly ITeacherEnrollmentsData _teacherEnrollmentsData;
         private readonly IExportService _exportService;
         private readonly IWebHostEnvironment _hostingEnvironment;
         public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData,
-            IExportService exportService, IWebHostEnvironment hostingEnvironment)
+            ITeacherEnrollmentsData teacherEnrollmentsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
         {
             _assignmentsData = assignmentsData;
             _classesData = classesData;
+            _teacherEnrollmentsData = teacherEnrollmentsData;
             _exportService = exportService;
             _hostingEnvironment = hostingEnvironment;
         }
@@ -50,56 +52,77 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Insert(AssignmentsViewModelAdd model)
         {
+            string? filePath = null;
+            
+            if (model.FilePath != null && model.FilePath.Length > 0)
+            {
+                string folderName = $"{model.ClassName}_{model.Section}";
+                string pathToSave = Path.Combine(_hostingEnvironment.WebRootPath, "attachments", folderName);
+                
+                if(!Directory.Exists(pathToSave))
+                {
+                    Directory.CreateDirectory(pathToSave);
+                }
+
+                filePath = Path.Combine(pathToSave, model.FilePath.FileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.FilePath.CopyToAsync(fileStream);
+                }
+            }
+
+            long teacherEnrollmentId = _teacherEnrollmentsData.GetTeacherEnrollmentByClassId(model.ClassId)?.Id ?? 0;
 
             long assignmentsId = _assignmentsData.InsertAssignments(new Assignments()
             {
-                TeacherEnrollmentId = model.TeacherEnrollmentId,
+                TeacherEnrollmentId = teacherEnrollmentId,
                 Title = model.Title,
                 Description = model.Description,
+                FilePath = filePath,
                 Marks = model.Marks,
                 Deadline = model.Deadline,
                 IsPublish = model.IsPublish,
-                AssignmentGuid = model.AssignmentGuid,
                 CreatedDate = DateTime.Now,
                 IsActive = true
             });
-            return RedirectToAction("Index", "Assignments");
+            return RedirectToAction("TeacherAllAssignments", "Assignments");
         }
         public IActionResult Edit(int id)
         {
             AssignmentsViewModelEdit model = new AssignmentsViewModelEdit();
             var assignments = _assignmentsData.GetAssignmentsById(id);
-            if (assignments != null)
-            {
-                model.Id = assignments.Id;
-                model.TeacherEnrollmentId = assignments.TeacherEnrollmentId;
-                model.Title = assignments.Title;
-                model.Description = assignments.Description;
-                model.Marks = assignments.Marks;
-                model.Deadline = assignments.Deadline;
-                model.IsPublish = assignments.IsPublish;
-                model.AssignmentGuid = assignments.AssignmentGuid;
-                model.IsActive = assignments.IsActive;
-            }
+            //if (assignments != null)
+            //{
+            //    model.Id = assignments.Id;
+            //    model.TeacherEnrollmentId = assignments.TeacherEnrollmentId;
+            //    model.Title = assignments.Title;
+            //    model.Description = assignments.Description;
+            //    model.Marks = assignments.Marks;
+            //    model.Deadline = assignments.Deadline;
+            //    model.IsPublish = assignments.IsPublish;
+            //    model.AssignmentGuid = assignments.AssignmentGuid;
+            //    model.IsActive = assignments.IsActive;
+            //}
             return View(model);
         }
         [HttpPost]
         public async Task<IActionResult> Update(AssignmentsViewModelEdit model)
         {
 
-            _assignmentsData.UpdateAssignmentsById(new Assignments()
-            {
-                Id = model.Id,
-                TeacherEnrollmentId = model.TeacherEnrollmentId,
-                Title = model.Title,
-                Description = model.Description,
-                Marks = model.Marks,
-                Deadline = model.Deadline,
-                IsPublish = model.IsPublish,
-                AssignmentGuid = model.AssignmentGuid,
-                IsActive = model.IsActive,
-                ModifiedDate = DateTime.Now
-            });
+            //_assignmentsData.UpdateAssignmentsById(new Assignments()
+            //{
+            //    Id = model.Id,
+            //    TeacherEnrollmentId = model.TeacherEnrollmentId,
+            //    Title = model.Title,
+            //    Description = model.Description,
+            //    Marks = model.Marks,
+            //    Deadline = model.Deadline,
+            //    IsPublish = model.IsPublish,
+            //    AssignmentGuid = model.AssignmentGuid,
+            //    IsActive = model.IsActive,
+            //    ModifiedDate = DateTime.Now
+            //});
             return RedirectToAction("Index", "Assignments");
         }
         [HttpPost("Assignments/LoadTable")]

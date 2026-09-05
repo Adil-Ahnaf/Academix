@@ -47,5 +47,10 @@ namespace DataAccessLayer.DataAccess
         {
             return _dataAccess.GetSingle<TeacherEnrollments>(SpConstants.GetTeacherEnrollmentByClassAndTeacher, new { classGuid, teacherGuid });
         }
+
+        public TeacherEnrollments GetTeacherEnrollmentByClassId(long classId)
+        {
+            return _dataAccess.GetSingle<TeacherEnrollments>(SpConstants.GetTeacherEnrollmentByClassId, new { classId });
+        }
     }
 }
