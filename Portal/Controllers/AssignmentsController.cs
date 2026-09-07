@@ -1,12 +1,12 @@
 using BusinessLayer.Models;
-using Portal.Models;
-using DataAccessLayer.DataAccess;
 using BusinessLayer.Services.ExportService;
-using Microsoft.AspNetCore.Mvc;
-using Portal.Extensions;
-using Portal.Models.DatatableModels;
+using DataAccessLayer.DataAccess;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Portal.Extensions;
+using Portal.Models;
+using Portal.Models.DatatableModels;
 
 namespace Portal.Controllers
 {
@@ -15,15 +15,13 @@ namespace Portal.Controllers
     {
         private readonly IAssignmentsData _assignmentsData;
         private readonly IClassesData _classesData;
-        private readonly ITeacherEnrollmentsData _teacherEnrollmentsData;
         private readonly IExportService _exportService;
         private readonly IWebHostEnvironment _hostingEnvironment;
-        public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData,
-            ITeacherEnrollmentsData teacherEnrollmentsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
+        public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData, IExportService exportService,
+            IWebHostEnvironment hostingEnvironment)
         {
             _assignmentsData = assignmentsData;
             _classesData = classesData;
-            _teacherEnrollmentsData = teacherEnrollmentsData;
             _exportService = exportService;
             _hostingEnvironment = hostingEnvironment;
         }
@@ -33,15 +31,17 @@ namespace Portal.Controllers
             return View();
         }
 
-        [HttpGet("Assignments/All")]
-        public IActionResult TeacherAllAssignments()
+        [HttpGet("Assignments/All/{classGuid}")]
+        public IActionResult AllAssignments(Guid classGuid)
         {
             var model = new AssignmentsViewModel();
 
-            model.AllAssignment = _assignmentsData.GetAllAssignmentByTeacherAspNetUserId(UserGuid);
+            model.ClassInfo = _classesData.GetClassesById(classGuid);
+            model.AllAssignment = _assignmentsData.GetAllAssignmentByClassGuid(classGuid);
             model.TotalAssignment = model.AllAssignment.Count;
             model.PublishedAssignment = model.AllAssignment.Count(a => a.IsPublish);
             model.DraftAssignment = model.AllAssignment.Count(a => !a.IsPublish);
+            model.TotalSubmissions = model.AllAssignment.Sum(a => a.TotalSubmissions);
 
             return View(model);
         }
@@ -60,13 +60,13 @@ namespace Portal.Controllers
         public async Task<IActionResult> Insert(AssignmentsViewModelAdd model)
         {
             string? filePath = null;
-            
+
             if (model.FilePath != null && model.FilePath.Length > 0)
             {
                 string folderName = $"{model.ClassName}_{model.Section}";
                 string pathToSave = Path.Combine(_hostingEnvironment.WebRootPath, "attachments", folderName);
-                
-                if(!Directory.Exists(pathToSave))
+
+                if (!Directory.Exists(pathToSave))
                 {
                     Directory.CreateDirectory(pathToSave);
                 }
@@ -91,12 +91,12 @@ namespace Portal.Controllers
                 CreatedDate = DateTime.Now,
                 IsActive = true
             });
-            return RedirectToAction("TeacherAllAssignments", "Assignments");
+            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassInfo.ClassGuid });
         }
         public IActionResult Edit(int id)
         {
             AssignmentsViewModelEdit model = new AssignmentsViewModelEdit();
-            var assignments = _assignmentsData.GetAssignmentsById(id);
+            //var assignments = _assignmentsData.GetAssignmentsById(id);
             //if (assignments != null)
             //{
             //    model.Id = assignments.Id;
@@ -178,5 +178,40 @@ namespace Portal.Controllers
                     .ToList()
             });
         }
+        public IActionResult Download(Guid assignmentGuid)
+        {
+            var assignment = _assignmentsData.GetAssignmentsById(assignmentGuid);
+
+            if (assignment == null)
+                return NotFound();
+
+            var filePath = assignment.FilePath;
+
+            if (string.IsNullOrWhiteSpace(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound();
+            }
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            var fileName = Path.GetFileName(filePath);
+
+            // Open file in browser when supported
+            Response.Headers.Append(
+                "Content-Disposition",
+                $"inline; filename=\"{fileName}\""
+            );
+
+            return PhysicalFile(
+                filePath,
+                contentType
+            );
+        }
+
     }
 }

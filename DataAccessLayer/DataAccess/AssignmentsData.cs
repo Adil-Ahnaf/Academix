@@ -23,9 +23,9 @@ namespace DataAccessLayer.DataAccess
 			return _dataAccess.GetList<Assignments>(SpConstants.GetAllAssignments);
 		}
 
-		public Assignments GetAssignmentsById(long id)
+		public Assignments GetAssignmentsById(Guid assignmentGuid)
 		{
-			return _dataAccess.GetSingle<Assignments>(SpConstants.GetAssignmentsById, new{ id });
+			return _dataAccess.GetSingle<Assignments>(SpConstants.GetAssignmentsById, new{ assignmentGuid });
 		}
 
 		public void DeleteAssignmentsById(long id)
@@ -38,9 +38,9 @@ namespace DataAccessLayer.DataAccess
 			_dataAccess.Execute(SpConstants.UpdateAssignmentsById, new{ assignments.Id, assignments.ClassId, assignments.Title, assignments.Description, assignments.FilePath, assignments.Marks, assignments.Deadline, assignments.IsPublish, assignments.AssignmentGuid, assignments.ModifiedDate, assignments.IsActive });
 		}
 
-        public List<Assignments> GetAllAssignmentByTeacherAspNetUserId(string aspNetUserId)
+        public List<Assignments> GetAllAssignmentByClassGuid(Guid classGuid)
         {
-            return _dataAccess.GetList<Assignments>(SpConstants.GetAllAssignmentByTeacherAspNetUserId, new { aspNetUserId });
+            return _dataAccess.GetList<Assignments>(SpConstants.GetAllAssignmentByClassGuid, new { classGuid });
         }
     }
 }

@@ -22,7 +22,7 @@ namespace DataAccessLayer
         public static string GetAssignmentsById = "usp_GetAssignmentsById";
         public static string DeleteAssignmentsById = "usp_DeleteAssignmentsById";
         public static string UpdateAssignmentsById = "usp_UpdateAssignmentsById";
-        public static string GetAllAssignmentByTeacherAspNetUserId = "usp_GetAllAssignmentByTeacherAspNetUserId";
+        public static string GetAllAssignmentByClassGuid = "usp_GetAllAssignmentByClassGuid";
 
         public static string InsertClasses = "usp_InsertClasses";
         public static string GetAllClasses = "usp_GetAllClasses";

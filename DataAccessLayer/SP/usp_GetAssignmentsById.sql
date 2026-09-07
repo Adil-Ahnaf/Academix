@@ -1,8 +1,8 @@
 CREATE OR ALTER PROCEDURE [dbo].[usp_GetAssignmentsById]
-	@Id bigint
+	@AssignmentGuid UNIQUEIDENTIFIER
 AS
 BEGIN
 	SET NOCOUNT ON;
 
-	SELECT * FROM [dbo].[Assignments] WHERE Id = @Id;
+	SELECT * FROM [dbo].[Assignments] WHERE AssignmentGuid = @AssignmentGuid;
 END

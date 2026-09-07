@@ -27,5 +27,6 @@ namespace BusinessLayer.Models
 		public DateTime? ModifiedDate { get; set; }
 		[Display(Name = "Is Active")]
 		public bool IsActive { get; set; }
-	}
+		public int TotalSubmissions { get; set; }
+    }
 }

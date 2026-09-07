@@ -6,10 +6,10 @@ namespace DataAccessLayer.DataAccess
 	{
 		long InsertAssignments(Assignments assignments);
 		List<Assignments> GetAllAssignments();
-		Assignments GetAssignmentsById(long id);
+		Assignments GetAssignmentsById(Guid assignmentGuid);
 		void DeleteAssignmentsById(long id);
 		void UpdateAssignmentsById(Assignments assignments);
-		List<Assignments> GetAllAssignmentByTeacherAspNetUserId(string aspNetUserId);
+		List<Assignments> GetAllAssignmentByClassGuid(Guid classGuid);
 
     }
 }
