@@ -10,5 +10,6 @@ namespace Portal.Models
         public int PublishedAssignment { get; set; }
         public int DraftAssignment { get; set; }
         public int TotalSubmissions { get; set; }
+        public int TotalStudents { get; set; }
     }
 }

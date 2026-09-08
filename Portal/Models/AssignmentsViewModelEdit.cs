@@ -1,27 +1,22 @@
-using System.ComponentModel.DataAnnotations;
+using BusinessLayer.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Portal.Models
 {
 	public class AssignmentsViewModelEdit
 	{
-		[Display(Name = "Id")]
-		public long Id { get; set; }
-		[Display(Name = "Teacher Enrollment Id")]
-		public long TeacherEnrollmentId { get; set; }
-		[Display(Name = "Title")]
-		public string Title { get; set; }
-		[Display(Name = "Description")]
-		public string Description { get; set; }
-		[Display(Name = "Marks")]
-		public int Marks { get; set; }
-		[Display(Name = "Deadline")]
-		public DateTime Deadline { get; set; }
-		[Display(Name = "Is Publish")]
-		public int IsPublish { get; set; }
-		[Display(Name = "Assignment Guid")]
-		public Guid AssignmentGuid { get; set; }
-		[Display(Name = "Is Active")]
-		public bool IsActive { get; set; }
-	}
+        public Guid AssignmentGuid { get; set; }
+        public long ClassId { get; set; }
+        public string ClassName { get; set; }
+        public string Section { get; set; }
+        public string Title { get; set; }
+        public IFormFile? FilePath { get; set; }
+        public string? ExistingFilePath { get; set; }
+        public string? Description { get; set; }
+        public int Marks { get; set; }
+        public DateTime Deadline { get; set; }
+        public bool IsPublish { get; set; }
+        public Classes ClassInfo { get; set; }
+    }
 }

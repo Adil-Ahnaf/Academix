@@ -40,7 +40,7 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Insert(Guid classGuid, Guid teacherGuid)
         {
-            var class_data = _classesData.GetClassesById(classGuid);
+            var class_data = _classesData.GetClassesByClassGuid(classGuid);
             var teacher_data = _teachersData.GetTeachersById(teacherGuid);
 
             long teacherEnrollmentsId = _teacherEnrollmentsData.InsertTeacherEnrollments(new TeacherEnrollments()
@@ -65,7 +65,7 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(Guid classGuid, Guid teacherGuid)
         {
-            var class_data = _classesData.GetClassesById(classGuid);
+            var class_data = _classesData.GetClassesByClassGuid(classGuid);
             var teacher_data = _teachersData.GetTeachersById(teacherGuid);
 
             var enrollment = _teacherEnrollmentsData.GetTeacherEnrollmentByClassAndTeacher(classGuid, teacherGuid);

@@ -23,9 +23,14 @@ namespace DataAccessLayer.DataAccess
 			return _dataAccess.GetList<Classes>(SpConstants.GetAllClasses);
 		}
 
-		public Classes GetClassesById(Guid classGuid)
+        public Classes GetClassesById(long id)
+        {
+            return _dataAccess.GetSingle<Classes>(SpConstants.GetClassesById, new { id });
+        }
+
+        public Classes GetClassesByClassGuid(Guid classGuid)
 		{
-			return _dataAccess.GetSingle<Classes>(SpConstants.GetClassesById, new{ classGuid });
+			return _dataAccess.GetSingle<Classes>(SpConstants.GetClassesByClassGuid, new{ classGuid });
 		}
 
 		public void DeleteClassesById(long id)

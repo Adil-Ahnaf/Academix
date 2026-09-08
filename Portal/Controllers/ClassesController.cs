@@ -63,7 +63,7 @@ namespace Portal.Controllers
         public IActionResult Edit(Guid classGuid)
         {
             ClassesViewModelEdit model = new ClassesViewModelEdit();
-            var classes = _classesData.GetClassesById(classGuid);
+            var classes = _classesData.GetClassesByClassGuid(classGuid);
             if (classes != null)
             {
                 model.Id = classes.Id;
@@ -102,7 +102,7 @@ namespace Portal.Controllers
             var model = new EnrollmentDetailsViewModel
             {
                 EnrolledTeacher = _teachersData.GetEnrolledTeacherByClassGuid(classGuid),
-                EnrolledClass = _classesData.GetClassesById(classGuid)
+                EnrolledClass = _classesData.GetClassesByClassGuid(classGuid)
             };
             return View(model);
         }

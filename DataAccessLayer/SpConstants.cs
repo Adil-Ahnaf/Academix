@@ -26,6 +26,7 @@ namespace DataAccessLayer
 
         public static string InsertClasses = "usp_InsertClasses";
         public static string GetAllClasses = "usp_GetAllClasses";
+        public static string GetClassesByClassGuid = "usp_GetClassesByClassGuid";
         public static string GetClassesById = "usp_GetClassesById";
         public static string DeleteClassesById = "usp_DeleteClassesById";
         public static string UpdateClassesById = "usp_UpdateClassesById";

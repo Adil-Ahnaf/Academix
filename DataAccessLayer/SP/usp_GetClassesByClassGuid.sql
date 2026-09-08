@@ -1,5 +1,5 @@
 CREATE OR ALTER PROCEDURE [dbo].[usp_GetClassesByClassGuid]
-	@Id BIGINT
+	@ClassGuid UNIQUEIDENTIFIER
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -7,5 +7,5 @@ BEGIN
 	SELECT C.*, S.Name AS SubjectName
 	FROM [dbo].[Classes] AS C
 	INNER JOIN [dbo].[Subjects] AS S ON S.Id = C.SubjectId
-	WHERE C.Id = @Id;
+	WHERE C.ClassGuid = @ClassGuid;
 END

@@ -53,7 +53,7 @@ namespace Portal.Controllers
             }
             else
             {
-                long classId = _classesData.GetClassesById(classGuid).Id;
+                long classId = _classesData.GetClassesByClassGuid(classGuid).Id;
                 long studentId = _studentsData.GetStudentsById(studentGuid).Id;
 
                 long studentEnrollmentsId = _studentEnrollmentsData.InsertStudentEnrollments(new StudentEnrollments()

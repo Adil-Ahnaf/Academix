@@ -15,14 +15,14 @@ namespace Portal.Controllers
     {
         private readonly IAssignmentsData _assignmentsData;
         private readonly IClassesData _classesData;
-        private readonly IExportService _exportService;
+        private readonly IStudentsData _studentsData;
         private readonly IWebHostEnvironment _hostingEnvironment;
-        public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData, IExportService exportService,
+        public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData, IStudentsData studentsData,
             IWebHostEnvironment hostingEnvironment)
         {
             _assignmentsData = assignmentsData;
             _classesData = classesData;
-            _exportService = exportService;
+            _studentsData = studentsData;
             _hostingEnvironment = hostingEnvironment;
         }
 
@@ -36,12 +36,13 @@ namespace Portal.Controllers
         {
             var model = new AssignmentsViewModel();
 
-            model.ClassInfo = _classesData.GetClassesById(classGuid);
+            model.ClassInfo = _classesData.GetClassesByClassGuid(classGuid);
             model.AllAssignment = _assignmentsData.GetAllAssignmentByClassGuid(classGuid);
             model.TotalAssignment = model.AllAssignment.Count;
             model.PublishedAssignment = model.AllAssignment.Count(a => a.IsPublish);
             model.DraftAssignment = model.AllAssignment.Count(a => !a.IsPublish);
             model.TotalSubmissions = model.AllAssignment.Sum(a => a.TotalSubmissions);
+            model.TotalStudents = _studentsData.GetEnrolledStudentsByClassGuid(classGuid).Count; 
 
             return View(model);
         }
@@ -51,7 +52,7 @@ namespace Portal.Controllers
         {
             var model = new AssignmentsViewModelAdd
             {
-                ClassInfo = _classesData.GetClassesById(classGuid)
+                ClassInfo = _classesData.GetClassesByClassGuid(classGuid)
             };
             return View(model);
         }
@@ -93,22 +94,22 @@ namespace Portal.Controllers
             });
             return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassInfo.ClassGuid });
         }
-        public IActionResult Edit(int id)
+        public IActionResult Edit(Guid assignmentGuid)
         {
             AssignmentsViewModelEdit model = new AssignmentsViewModelEdit();
-            //var assignments = _assignmentsData.GetAssignmentsById(id);
-            //if (assignments != null)
-            //{
-            //    model.Id = assignments.Id;
-            //    model.TeacherEnrollmentId = assignments.TeacherEnrollmentId;
-            //    model.Title = assignments.Title;
-            //    model.Description = assignments.Description;
-            //    model.Marks = assignments.Marks;
-            //    model.Deadline = assignments.Deadline;
-            //    model.IsPublish = assignments.IsPublish;
-            //    model.AssignmentGuid = assignments.AssignmentGuid;
-            //    model.IsActive = assignments.IsActive;
-            //}
+            var assignments = _assignmentsData.GetAssignmentsById(assignmentGuid);
+            if (assignments != null)
+            {
+                model.Title = assignments.Title;
+                model.ExistingFilePath = assignments.FilePath;
+                model.Description = assignments.Description;
+                model.Marks = assignments.Marks;
+                model.Deadline = assignments.Deadline;
+                model.IsPublish = assignments.IsPublish;
+                model.AssignmentGuid = assignments.AssignmentGuid;
+                model.ClassInfo = _classesData.GetClassesById(assignments.ClassId);
+            }
+
             return View(model);
         }
         [HttpPost]
