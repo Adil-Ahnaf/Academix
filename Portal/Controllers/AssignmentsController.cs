@@ -92,7 +92,7 @@ namespace Portal.Controllers
                 CreatedDate = DateTime.Now,
                 IsActive = true
             });
-            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassInfo.ClassGuid });
+            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassGuid });
         }
 
         [HttpGet("Assignments/Edit/{assignmentGuid}")]
@@ -114,6 +114,7 @@ namespace Portal.Controllers
 
             return View(model);
         }
+        
         [HttpPost]
         public async Task<IActionResult> Update(AssignmentsViewModelEdit model)
         {
@@ -165,6 +166,28 @@ namespace Portal.Controllers
 
             return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassGuid });
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(Guid assignmentGuid, Guid classGuid)
+        {
+            var existingAssignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
+            if (existingAssignment == null)
+            {
+                return NotFound();
+            }
+            
+            // Delete the assignment
+            _assignmentsData.DeleteAssignmentsById(existingAssignment.Id);
+            
+            // Delete the attachment file if it exists
+            if (!string.IsNullOrEmpty(existingAssignment.FilePath) && System.IO.File.Exists(existingAssignment.FilePath))
+            {
+                System.IO.File.Delete(existingAssignment.FilePath);
+            }
+
+            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = classGuid });
+        }
+
         [HttpPost("Assignments/LoadTable")]
         public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
         {
@@ -213,6 +236,7 @@ namespace Portal.Controllers
                     .ToList()
             });
         }
+        
         public IActionResult Download(Guid assignmentGuid)
         {
             var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);

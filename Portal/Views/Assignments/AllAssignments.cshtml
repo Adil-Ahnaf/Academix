@@ -3,6 +3,44 @@
     ViewData["Title"] = "Assignments";
 }
 
+<!-- =========================================================
+         DELETE MODAL
+========================================================== -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Assignment</h5>
+
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Are you sure you want to delete
+                <strong id="assignmentTitle"></strong>?
+            </div>
+
+            <div class="modal-footer">
+
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                <form asp-controller="Assignments" asp-action="Delete" method="post">
+
+                    <input type="hidden" name="classGuid" id="classGuid" value="@Model.ClassInfo.ClassGuid" />
+
+                    <input type="hidden" name="assignmentGuid" id="assignmentGuid" />
+
+                    <button type="submit" class="btn btn-danger">Delete</button>
+
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid px-4">
 
     <!-- =========================================================
@@ -293,6 +331,17 @@
 
                                         <div class="d-flex gap-2 flex-shrink-0">
 
+                                            @if (!item.IsPublish)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                                        data-id="@item.AssignmentGuid" data-title="@item.Title"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+
+                                                    <i class="fa-solid fa-trash me-1"></i>
+                                                    Delete
+                                                </button>
+                                            }
+
                                             <a asp-controller="Assignments" asp-action="Edit" asp-route-assignmentGuid="@item.AssignmentGuid"
                                                class="btn btn-sm btn-outline-primary">
                                                 <i class="fa-solid fa-pen me-1"></i>
@@ -385,3 +434,20 @@
     </div>
 
 </div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(document).on("click", ".delete-btn", function() {
+
+            var id = $(this).data("id");
+            var title = $(this).data("title");
+
+            $("#assignmentGuid").val(id);
+            $("#assignmentTitle").text(title);
+
+        });
+    </script>
+}

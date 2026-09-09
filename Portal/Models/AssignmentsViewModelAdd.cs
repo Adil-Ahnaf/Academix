@@ -29,6 +29,7 @@ namespace Portal.Models
         public string? ClassName { get; set; }
         public string? Section { get; set; }
         public long ClassId { get; set; }
+        public Guid ClassGuid { get; set; }
         [Required]
         public IFormFile? FilePath { get; set; }
     }

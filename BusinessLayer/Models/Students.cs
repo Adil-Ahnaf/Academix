@@ -7,7 +7,7 @@ namespace BusinessLayer.Models
 		public long Id { get; set; }
 		[Display(Name = "Asp Net User Id")]
 		public string AspNetUserId { get; set; }
-		[Display(Name = "Student Code")]
+		[Display(Name = "Student Id")]
 		public string StudentCode { get; set; }
 		[Display(Name = "Full Name")]
 		public string FullName { get; set; }
