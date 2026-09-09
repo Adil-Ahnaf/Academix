@@ -7,6 +7,7 @@ namespace Portal.Models
 	public class AssignmentsViewModelEdit
 	{
         public Guid AssignmentGuid { get; set; }
+        public Guid ClassGuid { get; set; }
         public long ClassId { get; set; }
         public string ClassName { get; set; }
         public string Section { get; set; }

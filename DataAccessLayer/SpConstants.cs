@@ -20,6 +20,7 @@ namespace DataAccessLayer
         public static string InsertAssignments = "usp_InsertAssignments";
         public static string GetAllAssignments = "usp_GetAllAssignments";
         public static string GetAssignmentsById = "usp_GetAssignmentsById";
+		public static string GetAssignmentByAssignmentGuid = "usp_GetAssignmentByAssignmentGuid";
         public static string DeleteAssignmentsById = "usp_DeleteAssignmentsById";
         public static string UpdateAssignmentsById = "usp_UpdateAssignmentsById";
         public static string GetAllAssignmentByClassGuid = "usp_GetAllAssignmentByClassGuid";

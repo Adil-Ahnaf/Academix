@@ -42,7 +42,7 @@ namespace Portal.Controllers
             model.PublishedAssignment = model.AllAssignment.Count(a => a.IsPublish);
             model.DraftAssignment = model.AllAssignment.Count(a => !a.IsPublish);
             model.TotalSubmissions = model.AllAssignment.Sum(a => a.TotalSubmissions);
-            model.TotalStudents = _studentsData.GetEnrolledStudentsByClassGuid(classGuid).Count; 
+            model.TotalStudents = _studentsData.GetEnrolledStudentsByClassGuid(classGuid).Count;
 
             return View(model);
         }
@@ -94,10 +94,12 @@ namespace Portal.Controllers
             });
             return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassInfo.ClassGuid });
         }
+
+        [HttpGet("Assignments/Edit/{assignmentGuid}")]
         public IActionResult Edit(Guid assignmentGuid)
         {
             AssignmentsViewModelEdit model = new AssignmentsViewModelEdit();
-            var assignments = _assignmentsData.GetAssignmentsById(assignmentGuid);
+            var assignments = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
             if (assignments != null)
             {
                 model.Title = assignments.Title;
@@ -115,21 +117,53 @@ namespace Portal.Controllers
         [HttpPost]
         public async Task<IActionResult> Update(AssignmentsViewModelEdit model)
         {
+            var existingAssignment = _assignmentsData.GetAssignmentByAssignmentGuid(model.AssignmentGuid);
 
-            //_assignmentsData.UpdateAssignmentsById(new Assignments()
-            //{
-            //    Id = model.Id,
-            //    TeacherEnrollmentId = model.TeacherEnrollmentId,
-            //    Title = model.Title,
-            //    Description = model.Description,
-            //    Marks = model.Marks,
-            //    Deadline = model.Deadline,
-            //    IsPublish = model.IsPublish,
-            //    AssignmentGuid = model.AssignmentGuid,
-            //    IsActive = model.IsActive,
-            //    ModifiedDate = DateTime.Now
-            //});
-            return RedirectToAction("Index", "Assignments");
+            if (existingAssignment == null)
+            {
+                return NotFound();
+            }
+
+            string? filePath = existingAssignment.FilePath;
+
+            if (model.FilePath != null && model.FilePath.Length > 0)
+            {
+                // Save the new file
+                string folderName = $"{model.ClassName}_{model.Section}";
+                string pathToSave = Path.Combine(_hostingEnvironment.WebRootPath, "attachments", folderName);
+                if (!Directory.Exists(pathToSave))
+                {
+                    Directory.CreateDirectory(pathToSave);
+                }
+                filePath = Path.Combine(pathToSave, model.FilePath.FileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.FilePath.CopyToAsync(fileStream);
+                }
+
+                // Delete previous attachment
+                if (!string.IsNullOrEmpty(existingAssignment.FilePath) && System.IO.File.Exists(existingAssignment.FilePath))
+                {
+                    System.IO.File.Delete(existingAssignment.FilePath);
+                }
+
+                filePath = Path.Combine(pathToSave, model.FilePath.FileName);
+            }
+
+            // update the assignment with the new values
+            _assignmentsData.UpdateAssignmentsById( new Assignments()
+            {
+                Id = existingAssignment.Id,
+                Title = model.Title,
+                Description = model.Description,
+                FilePath = filePath,
+                Marks = model.Marks,
+                Deadline = model.Deadline,
+                IsPublish = model.IsPublish,
+                ModifiedDate = DateTime.Now
+            });
+
+            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassGuid });
         }
         [HttpPost("Assignments/LoadTable")]
         public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
@@ -181,7 +215,7 @@ namespace Portal.Controllers
         }
         public IActionResult Download(Guid assignmentGuid)
         {
-            var assignment = _assignmentsData.GetAssignmentsById(assignmentGuid);
+            var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
 
             if (assignment == null)
                 return NotFound();

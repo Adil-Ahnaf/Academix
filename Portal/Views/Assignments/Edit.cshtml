@@ -85,21 +85,17 @@
 
         <div class="card-body p-4 p-lg-5">
 
-            <form method="post"
-                  asp-controller="Assignments"
-                  asp-action="Update"
-                  enctype="multipart/form-data">
+            <form method="post" asp-controller="Assignments" asp-action="Update" enctype="multipart/form-data">
 
-                <div asp-validation-summary="ModelOnly"
-                     class="alert alert-danger"
-                     role="alert">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert">
                 </div>
-
 
                 <!-- Hidden values -->
                 <div class="d-none">
 
-                    <input asp-for="AssignmentGuid" />
+                    <input asp-for="AssignmentGuid" value="@Model.AssignmentGuid" />
+
+                    <input asp-for="ClassGuid" value="@Model.ClassInfo.ClassGuid" />
 
                     <input asp-for="ClassId" value="@Model.ClassInfo.Id" />
 
@@ -189,9 +185,7 @@
 
                             <div class="flex-shrink-0">
 
-                                <div class="bg-white border rounded-3
-                                    d-flex align-items-center
-                                    justify-content-center"
+                                <div class="bg-white border rounded-3 d-flex align-items-center justify-content-center"
                                      style="width:48px;height:48px;">
 
                                     <i class="fa-solid fa-file-arrow-up
@@ -205,18 +199,14 @@
 
                             <div class="flex-grow-1">
 
-                                <input asp-for="FilePath"
-                                       type="file"
-                                       class="form-control"
+                                <input asp-for="FilePath" type="file" class="form-control"
                                        accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" />
 
                                 <div class="form-text">
 
-                                    Select a new file only if you want
-                                    to replace the current attachment.
+                                    Select a new file only if you want to replace the current attachment.
 
-                                    Supported files: PDF, Word,
-                                    PowerPoint, Excel and TXT.
+                                    Supported files: PDF, Word, PowerPoint, Excel and TXT.
 
                                 </div>
 
@@ -227,9 +217,7 @@
                     </div>
 
 
-                    <span asp-validation-for="FilePath"
-                          class="text-danger small">
-                    </span>
+                    <span asp-validation-for="FilePath" class="text-danger small"></span>
 
                 </div>
 
@@ -237,8 +225,7 @@
                 <!-- Description -->
                 <div class="mb-4">
 
-                    <label asp-for="Description"
-                           class="form-label fw-medium">
+                    <label asp-for="Description" class="form-label fw-medium">
 
                         Description
 
@@ -248,9 +235,7 @@
 
                     </label>
 
-                    <textarea asp-for="Description"
-                              class="form-control"
-                              rows="7"></textarea>
+                    <textarea asp-for="Description" class="form-control" rows="7"></textarea>
 
                     <div class="form-text">
                         Provide clear instructions for students.
@@ -264,8 +249,7 @@
 
                     <div class="col-md-6">
 
-                        <label asp-for="Marks"
-                               class="form-label fw-medium">
+                        <label asp-for="Marks" class="form-label fw-medium">
 
                             Maximum Marks
                             <span class="text-danger">*</span>
@@ -274,42 +258,29 @@
 
                         <div class="input-group">
 
-                            <input asp-for="Marks"
-                                   type="number"
-                                   class="form-control"
-                                   min="1"
-                                   max="100"
-                                   placeholder="100" />
+                            <input asp-for="Marks" type="number" class="form-control" min="1" max="100" placeholder="100" />
 
-                            <span class="input-group-text">
-                                Marks
-                            </span>
+                            <span class="input-group-text">Marks</span>
 
                         </div>
 
-                        <span asp-validation-for="Marks"
-                              class="text-danger small">
-                        </span>
+                        <span asp-validation-for="Marks" class="text-danger small"></span>
 
                     </div>
 
 
                     <div class="col-md-6">
 
-                        <label asp-for="Deadline"
-                               class="form-label fw-medium">
+                        <label asp-for="Deadline" class="form-label fw-medium">
 
                             Submission Deadline
                             <span class="text-danger">*</span>
 
                         </label>
 
-                        <input asp-for="Deadline"
-                               type="datetime-local"
-                               class="form-control" />
+                        <input asp-for="Deadline" type="datetime-local" class="form-control" />
 
-                        <span asp-validation-for="Deadline"
-                              class="text-danger small">
+                        <span asp-validation-for="Deadline" class="text-danger small">
                         </span>
 
                         <div class="form-text">
@@ -332,8 +303,7 @@
                     </h5>
 
                     <p class="text-muted small mb-0">
-                        Choose whether the assignment should be published
-                        or saved as a draft.
+                        Choose whether the assignment should be published or saved as a draft.
                     </p>
 
                 </div>
@@ -346,20 +316,13 @@
 
                         <div class="form-check border rounded-3 p-3 h-100">
 
-                            <input class="form-check-input ms-0 me-2"
-                                   type="radio"
-                                   asp-for="IsPublish"
-                                   value="false"
-                                   id="saveDraft" />
+                            <input class="form-check-input ms-0 me-2" type="radio" asp-for="IsPublish" value="false" id="saveDraft" />
 
-                            <label class="form-check-label"
-                                   for="saveDraft">
+                            <label class="form-check-label" for="saveDraft">
 
                                 <span class="fw-semibold">
 
-                                    <i class="fa-solid fa-file-pen
-                                        text-warning me-2">
-                                    </i>
+                                    <i class="fa-solid fa-file-pen text-warning me-2"></i>
 
                                     Save as Draft
 
@@ -367,8 +330,7 @@
 
                                 <span class="d-block text-muted small mt-1">
 
-                                    Save the assignment without publishing
-                                    it to students.
+                                    Save the assignment without publishing it to students.
 
                                 </span>
 
@@ -384,20 +346,14 @@
 
                         <div class="form-check border rounded-3 p-3 h-100">
 
-                            <input class="form-check-input ms-0 me-2"
-                                   type="radio"
-                                   asp-for="IsPublish"
-                                   value="true"
+                            <input class="form-check-input ms-0 me-2" type="radio" asp-for="IsPublish" value="true"
                                    id="publishAssignment" />
 
-                            <label class="form-check-label"
-                                   for="publishAssignment">
+                            <label class="form-check-label" for="publishAssignment">
 
                                 <span class="fw-semibold">
 
-                                    <i class="fa-solid fa-paper-plane
-                                        text-success me-2">
-                                    </i>
+                                    <i class="fa-solid fa-paper-plane text-success me-2"></i>
 
                                     Publish Assignment
 
@@ -405,8 +361,7 @@
 
                                 <span class="d-block text-muted small mt-1">
 
-                                    Make the assignment available
-                                    to students.
+                                    Make the assignment available to students.
 
                                 </span>
 
@@ -420,12 +375,9 @@
 
 
                 <!-- Actions -->
-                <div class="d-flex flex-column flex-sm-row
-                    justify-content-end gap-2 mt-5 pt-4 border-top">
+                <div class="d-flex flex-column flex-sm-row justify-content-end gap-2 mt-5 pt-4 border-top">
 
-                    <a asp-controller="Assignments"
-                       asp-action="AllAssignments"
-                       asp-route-classGuid = "@Model.ClassInfo.ClassGuid"
+                    <a asp-controller="Assignments" asp-action="AllAssignments" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
                        class="btn btn-light border px-4">
 
                         <i class="fa-solid fa-xmark me-2"></i>
@@ -434,11 +386,10 @@
                     </a>
 
 
-                    <button type="submit"
-                            class="btn btn-primary px-4">
+                    <button type="submit" class="btn btn-primary px-4">
 
                         <i class="fa-solid fa-floppy-disk me-2"></i>
-                        Update Assignment
+                        Update
 
                     </button>
 
