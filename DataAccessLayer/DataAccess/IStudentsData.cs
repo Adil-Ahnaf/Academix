@@ -10,5 +10,7 @@ namespace DataAccessLayer.DataAccess
 		void DeleteStudentsById(long id);
 		void UpdateStudentsById(Students students);
 		List<Students> GetEnrolledStudentsByClassGuid(Guid classGuid);
-	}
+		List<Students> GetEnrolledStudentsEmailByClassGuid(Guid classGuid);
+
+    }
 }

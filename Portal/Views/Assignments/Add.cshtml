@@ -7,6 +7,23 @@
     ViewData["Title"] = "Create Assignment";
 }
 
+<!-- Publishing Overlay -->
+<div class="loadingOverlay d-none">
+    <div class="text-center">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+
+        <div class="fw-semibold">
+            Publishing assignment, please wait...
+        </div>
+
+        <div class="text-muted small mt-1">
+            Sending notifications to students
+        </div>
+    </div>
+</div>
+
 <div class="container-fluid px-4">
 
     <!-- Page Header -->
@@ -64,7 +81,7 @@
     <div class="card border-1 shadow-sm mb-4">
         <div class="card-body p-4 p-lg-5">
 
-            <form method="post" asp-controller="Assignments" asp-action="Insert" enctype="multipart/form-data">
+            <form id="assignmentForm" method="post" asp-controller="Assignments" asp-action="Insert" enctype="multipart/form-data">
 
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
@@ -74,7 +91,7 @@
                     <input asp-for="ClassName" value="@Model.ClassInfo.ClassName" type="hidden" />
                     <input asp-for="Section" value="@Model.ClassInfo.Section" type="hidden" />
                 </div>
-                
+
                 <div class="mb-4">
                     <label asp-for="Title" class="form-label fw-medium">
                         Assignment Title
@@ -192,25 +209,17 @@
 
                         <div class="form-check border rounded-3 p-3 h-100">
 
-                            <input class="form-check-input ms-0 me-2"
-                                   type="radio"
-                                   asp-for="IsPublish"
-                                   value="false"
-                                   id="saveDraft" />
+                            <input class="form-check-input ms-0 me-2" type="radio" asp-for="IsPublish" value="false" id="saveDraft" />
 
-                            <label class="form-check-label"
-                                   for="saveDraft">
+                            <label class="form-check-label" for="saveDraft">
 
                                 <span class="fw-semibold">
-                                    <i class="fa-solid fa-file-pen
-                                        text-warning me-2">
-                                    </i>
+                                    <i class="fa-solid fa-file-pen text-warning me-2"></i>
                                     Save as Draft
                                 </span>
 
                                 <span class="d-block text-muted small mt-1">
-                                    Save the assignment and continue editing
-                                    it later. Students will not see it.
+                                    Save the assignment and continue editing it later. Students will not see it.
                                 </span>
 
                             </label>
@@ -225,25 +234,17 @@
 
                         <div class="form-check border rounded-3 p-3 h-100">
 
-                            <input class="form-check-input ms-0 me-2"
-                                   type="radio"
-                                   asp-for="IsPublish"
-                                   value="true"
-                                   id="publishAssignment" />
+                            <input class="form-check-input ms-0 me-2" type="radio" asp-for="IsPublish" value="true" id="publishAssignment" />
 
-                            <label class="form-check-label"
-                                   for="publishAssignment">
+                            <label class="form-check-label" for="publishAssignment">
 
                                 <span class="fw-semibold">
-                                    <i class="fa-solid fa-paper-plane
-                                        text-success me-2">
-                                    </i>
+                                    <i class="fa-solid fa-paper-plane text-success me-2"></i>
                                     Publish Assignment
                                 </span>
 
                                 <span class="d-block text-muted small mt-1">
-                                    Publish the assignment immediately so
-                                    students can view and submit it.
+                                    Publish the assignment immediately so students can view and submit it.
                                 </span>
 
                             </label>
@@ -282,4 +283,23 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+
+            $("#assignmentForm").on("submit", function() {
+
+                // Check if Publish Assignment is selected
+                if ($("#publishAssignment").is(":checked")) {
+
+                    // Show spinner
+                    $(".loadingOverlay").removeClass("d-none");
+
+                    // Prevent multiple clicks
+                    $(this).find("button[type='submit']")
+                        .prop("disabled", true);
+                }
+            });
+
+        });
+    </script>
 }

@@ -9,7 +9,9 @@ namespace BusinessLayer.Models
 		public string AspNetUserId { get; set; }
 		[Display(Name = "Student Id")]
 		public string StudentCode { get; set; }
-		[Display(Name = "Full Name")]
+		[Display(Name = "Email Address")]
+        public string EmailAddress { get; set; }
+        [Display(Name = "Full Name")]
 		public string FullName { get; set; }
 		[Display(Name = "Gender")]
 		public string Gender { get; set; }

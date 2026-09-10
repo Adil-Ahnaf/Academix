@@ -16,6 +16,7 @@ namespace DataAccessLayer
         public static string DeleteStudentsById = "usp_DeleteStudentsById";
         public static string UpdateStudentsById = "usp_UpdateStudentsById";
         public static string GetEnrolledStudentsByClassGuid = "usp_GetEnrolledStudentsByClassGuid";
+        public static string GetEnrolledStudentsEmailByClassGuid = "usp_GetEnrolledStudentsEmailByClassGuid";
 
         public static string InsertAssignments = "usp_InsertAssignments";
         public static string GetAllAssignments = "usp_GetAllAssignments";

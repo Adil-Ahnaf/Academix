@@ -7,6 +7,7 @@ using BusinessLayer.Services.HtmlService;
 using DataAccessLayer.DataAccess;
 using DataAccessLayer.SqlDb;
 using Microsoft.AspNetCore.Identity;
+using Portal.Helpers;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -77,6 +78,7 @@ void ResolveServiceType(IServiceCollection services)
 {
     services.AddSingleton(new DbConnectionInfo { Key = "Portal_DbConnection" });
     services.AddSingleton<IDataAccess, SqlDapperDataAccess>();
+    services.AddSingleton<IEmailHelper, EmailHelper>();
     builder.Services.AddScoped<IExportService, ExportService>();
     builder.Services.AddScoped<IExcelService, ExcelService>();
     builder.Services.AddScoped<ICsvService, CsvService>();

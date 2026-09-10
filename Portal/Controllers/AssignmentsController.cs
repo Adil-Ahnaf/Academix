@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Portal.Extensions;
+using Portal.Helpers;
 using Portal.Models;
 using Portal.Models.DatatableModels;
 
@@ -17,13 +18,17 @@ namespace Portal.Controllers
         private readonly IClassesData _classesData;
         private readonly IStudentsData _studentsData;
         private readonly IWebHostEnvironment _hostingEnvironment;
+        private readonly IEmailHelper _emailHelper;
+        private readonly IConfiguration _configuration;
         public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData, IStudentsData studentsData,
-            IWebHostEnvironment hostingEnvironment)
+            IWebHostEnvironment hostingEnvironment, IEmailHelper emailHelper, IConfiguration configuration)
         {
             _assignmentsData = assignmentsData;
             _classesData = classesData;
             _studentsData = studentsData;
             _hostingEnvironment = hostingEnvironment;
+            _emailHelper = emailHelper;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -92,6 +97,28 @@ namespace Portal.Controllers
                 CreatedDate = DateTime.Now,
                 IsActive = true
             });
+
+            // Send notification to students in the class about the new assignment
+            if (model.IsPublish)
+            {
+                // Implementation for sending notification
+                var students = _studentsData.GetEnrolledStudentsEmailByClassGuid(model.ClassGuid).Select(s => s.EmailAddress).ToList();
+
+                string template = string.Empty;
+                using (StreamReader reader = new StreamReader(Path.Combine(_hostingEnvironment.WebRootPath, "EmailTemplates", "NewAssignmentAddNotifyEmail.html")))
+                {
+                    template = await reader.ReadToEndAsync();
+                }
+
+                var emailBody = template.Replace("{AssignmentTitle}", model.Title)
+                                        .Replace("{ClassName}", model.ClassName)
+                                        .Replace("{SectionName}", model.Section)
+                                        .Replace("{TotalMarks}", model.Marks.ToString())
+                                        .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
+
+                await _emailHelper.SendBulkEmailAsync(students, "New Assignment Added", emailBody);
+            }
+
             return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassGuid });
         }
 
@@ -114,7 +141,7 @@ namespace Portal.Controllers
 
             return View(model);
         }
-        
+
         [HttpPost]
         public async Task<IActionResult> Update(AssignmentsViewModelEdit model)
         {
@@ -152,7 +179,7 @@ namespace Portal.Controllers
             }
 
             // update the assignment with the new values
-            _assignmentsData.UpdateAssignmentsById( new Assignments()
+            _assignmentsData.UpdateAssignmentsById(new Assignments()
             {
                 Id = existingAssignment.Id,
                 Title = model.Title,
@@ -175,10 +202,10 @@ namespace Portal.Controllers
             {
                 return NotFound();
             }
-            
+
             // Delete the assignment
             _assignmentsData.DeleteAssignmentsById(existingAssignment.Id);
-            
+
             // Delete the attachment file if it exists
             if (!string.IsNullOrEmpty(existingAssignment.FilePath) && System.IO.File.Exists(existingAssignment.FilePath))
             {
@@ -236,7 +263,7 @@ namespace Portal.Controllers
                     .ToList()
             });
         }
-        
+
         public IActionResult Download(Guid assignmentGuid)
         {
             var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
