@@ -3,49 +3,52 @@
     ViewData["Title"] = "Assignments";
 }
 
-<!-- =========================================================
+@if (User.IsInRole("Teacher"))
+{
+    <!-- =========================================================
          DELETE MODAL
-========================================================== -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+    ========================================================== -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Delete Assignment</h5>
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Assignment</h5>
 
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    Are you sure you want to delete
+                    <strong id="assignmentTitle"></strong>?
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <form asp-controller="Assignments" asp-action="Delete" method="post">
+
+                        <input type="hidden" name="classGuid" id="classGuid" value="@Model.ClassInfo.ClassGuid" />
+
+                        <input type="hidden" name="assignmentGuid" id="assignmentGuid" />
+
+                        <button type="submit" class="btn btn-danger">Delete</button>
+
+                    </form>
+
+                </div>
+
             </div>
-
-            <div class="modal-body">
-                Are you sure you want to delete
-                <strong id="assignmentTitle"></strong>?
-            </div>
-
-            <div class="modal-footer">
-
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-
-                <form asp-controller="Assignments" asp-action="Delete" method="post">
-
-                    <input type="hidden" name="classGuid" id="classGuid" value="@Model.ClassInfo.ClassGuid" />
-
-                    <input type="hidden" name="assignmentGuid" id="assignmentGuid" />
-
-                    <button type="submit" class="btn btn-danger">Delete</button>
-
-                </form>
-
-            </div>
-
         </div>
     </div>
-</div>
+}
 
 <div class="container-fluid px-4">
 
     <!-- =========================================================
-         PAGE HEADER
-    ========================================================== -->
+             PAGE HEADER
+        ========================================================== -->
     <div class="my-4">
         <h4 class="mb-1 fw-semibold">
             <i class="fa-solid fa-clipboard-list text-primary me-2"></i>
@@ -58,136 +61,139 @@
     </div>
 
 
-    <!-- =========================================================
-         SUMMARY CARDS
-    ========================================================== -->
-    <div class="row g-3 mb-4">
+    @if (User.IsInRole("Teacher"))
+    {
+        <!-- =========================================================
+             SUMMARY CARDS
+        ========================================================== -->
+        <div class="row g-3 mb-4">
 
-        <!-- Total Assignments -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-1 shadow-sm h-100">
-                <div class="card-body p-4">
+            <!-- Total Assignments -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between
-                        align-items-start">
+                        <div class="d-flex justify-content-between
+                            align-items-start">
 
-                        <div>
-                            <p class="text-muted mb-2 small">Total Assignments</p>
-                            <h3 class="fw-bold mb-0">@Model.TotalAssignment</h3>
-                        </div>
+                            <div>
+                                <p class="text-muted mb-2 small">Total Assignments</p>
+                                <h3 class="fw-bold mb-0">@Model.TotalAssignment</h3>
+                            </div>
 
-                        <div class="bg-primary bg-opacity-10
-                            text-primary rounded-3
-                            d-flex align-items-center
-                            justify-content-center"
-                             style="width: 45px; height: 45px;">
+                            <div class="bg-primary bg-opacity-10
+                                text-primary rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
 
-                            <i class="fa-solid fa-clipboard-list fs-5"></i>
+                                <i class="fa-solid fa-clipboard-list fs-5"></i>
 
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Published -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-1 shadow-sm h-100">
-                <div class="card-body p-4">
-
-                    <div class="d-flex justify-content-between
-                        align-items-start">
-
-                        <div>
-                            <p class="text-muted mb-2 small">Published</p>
-                            <h3 class="fw-bold mb-0">@Model.PublishedAssignment</h3>
-                        </div>
-
-                        <div class="bg-success bg-opacity-10
-                            text-success rounded-3
-                            d-flex align-items-center
-                            justify-content-center"
-                             style="width: 45px; height: 45px;">
-
-                            <i class="fa-solid fa-circle-check fs-5"></i>
+                            </div>
 
                         </div>
 
                     </div>
-
                 </div>
             </div>
-        </div>
 
 
-        <!-- Drafts -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-1 shadow-sm h-100">
-                <div class="card-body p-4">
+            <!-- Published -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between
-                        align-items-start">
+                        <div class="d-flex justify-content-between
+                            align-items-start">
 
-                        <div>
-                            <p class="text-muted mb-2 small">Drafts</p>
-                            <h3 class="fw-bold mb-0">@Model.DraftAssignment</h3>
-                        </div>
+                            <div>
+                                <p class="text-muted mb-2 small">Published</p>
+                                <h3 class="fw-bold mb-0">@Model.PublishedAssignment</h3>
+                            </div>
 
-                        <div class="bg-warning bg-opacity-10
-                            text-warning rounded-3
-                            d-flex align-items-center
-                            justify-content-center"
-                             style="width: 45px; height: 45px;">
+                            <div class="bg-success bg-opacity-10
+                                text-success rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
 
-                            <i class="fa-solid fa-file-pen fs-5"></i>
+                                <i class="fa-solid fa-circle-check fs-5"></i>
+
+                            </div>
 
                         </div>
 
                     </div>
-
                 </div>
             </div>
-        </div>
 
 
-        <!-- Submissions -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="card border-1 shadow-sm h-100">
-                <div class="card-body p-4">
+            <!-- Drafts -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
 
-                    <div class="d-flex justify-content-between
-                        align-items-start">
+                        <div class="d-flex justify-content-between
+                            align-items-start">
 
-                        <div>
-                            <p class="text-muted mb-2 small">
-                                Submissions
-                            </p>
+                            <div>
+                                <p class="text-muted mb-2 small">Drafts</p>
+                                <h3 class="fw-bold mb-0">@Model.DraftAssignment</h3>
+                            </div>
 
-                            <h3 class="fw-bold mb-0">
-                                @Model.TotalSubmissions
-                            </h3>
-                        </div>
+                            <div class="bg-warning bg-opacity-10
+                                text-warning rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
 
-                        <div class="bg-info bg-opacity-10
-                            text-info rounded-3
-                            d-flex align-items-center
-                            justify-content-center"
-                             style="width: 45px; height: 45px;">
+                                <i class="fa-solid fa-file-pen fs-5"></i>
 
-                            <i class="fa-solid fa-users fs-5"></i>
+                            </div>
 
                         </div>
 
                     </div>
-
                 </div>
             </div>
-        </div>
 
-    </div>
+
+            <!-- Submissions -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between
+                            align-items-start">
+
+                            <div>
+                                <p class="text-muted mb-2 small">
+                                    Submissions
+                                </p>
+
+                                <h3 class="fw-bold mb-0">
+                                    @Model.TotalSubmissions
+                                </h3>
+                            </div>
+
+                            <div class="bg-info bg-opacity-10
+                                text-info rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
+
+                                <i class="fa-solid fa-users fs-5"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
 
 
     <!-- =========================================================
@@ -212,12 +218,15 @@
                     </p>
                 </div>
 
-                <!-- Add Assignment -->
-                <a asp-controller="Assignments" asp-action="Add" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
-                   class="btn btn-primary btn-sm px-3">
-                    <i class="fa-solid fa-plus me-1"></i>
-                    Add Assignment
-                </a>
+                @if (User.IsInRole("Teacher"))
+                {
+                    <!-- Add Assignment -->
+                    <a asp-controller="Assignments" asp-action="Add" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
+                       class="btn btn-primary btn-sm px-3">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        Add Assignment
+                    </a>
+                }
 
             </div>
 
@@ -255,9 +264,11 @@
                                                     @item.Title
                                                 </h6>
 
-                                                <small class="text-muted">
-                                                    Assignment
-                                                </small>
+                                                <!-- Description -->
+                                                <p class="text-muted small mb-1" style="display: -webkit-box; -webkit-line-clamp: 2;
+                                                    -webkit-box-orient: vertical; overflow: hidden;">
+                                                    @item.Description
+                                                </p>
 
                                             </div>
 
@@ -283,23 +294,49 @@
 
                                     <div class="assignment-detail rounded-3 p-3 mb-3">
 
-                                        <div class="d-flex align-items-center">
+                                        <div class="row g-3">
 
-                                            <div class="detail-icon bg-white rounded-2 d-flex align-items-center
-                                                justify-content-center me-3">
-                                                <i class="fa-regular fa-clock text-danger"></i>
+                                            <div class="d-flex align-items-center">
+
+                                                <div class="detail-icon bg-white rounded-2 d-flex align-items-center
+                                                    justify-content-center me-3">
+                                                    <i class="fa-regular fa-clock text-danger"></i>
+                                                </div>
+
+                                                <div>
+                                                    <small class="text-muted d-block">
+                                                        Deadline
+                                                    </small>
+
+                                                    <span class="fw-semibold text-dark">
+                                                        @item.Deadline.ToString(
+                                                            "MMM dd, yyyy • hh:mm tt"
+                                                        )
+                                                    </span>
+
+                                                </div>
+
                                             </div>
 
-                                            <div>
-                                                <small class="text-muted d-block">
-                                                    Deadline
-                                                </small>
+                                            <div class="col-md-5">
 
-                                                <span class="fw-semibold text-dark">
-                                                    @item.Deadline.ToString(
-                                                        "MMM dd, yyyy • hh:mm tt"
-                                                    )
-                                                </span>
+                                                <div class="d-flex align-items-center">
+
+                                                    <div class="detail-icon bg-white rounded-2 d-flex align-items-center justify-content-center me-3">
+                                                        <i class="fa-solid fa-star text-warning"></i>
+                                                    </div>
+
+                                                    <div>
+                                                        <small class="text-muted d-block">
+                                                            Total Marks
+                                                        </small>
+
+                                                        <span class="fw-semibold text-dark">
+                                                            @item.Marks
+                                                        </span>
+                                                    </div>
+
+                                                </div>
 
                                             </div>
 
@@ -342,11 +379,14 @@
                                                 </button>
                                             }
 
-                                            <a asp-controller="Assignments" asp-action="Edit" asp-route-assignmentGuid="@item.AssignmentGuid"
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fa-solid fa-pen me-1"></i>
-                                                Edit
-                                            </a>
+                                            @if (User.IsInRole("Teacher"))
+                                            {
+                                                <a asp-controller="Assignments" asp-action="Edit" asp-route-assignmentGuid="@item.AssignmentGuid"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fa-solid fa-pen me-1"></i>
+                                                    Edit
+                                                </a>
+                                            }
 
                                             <a asp-controller="Assignments" asp-action="Download" asp-route-assignmentGuid="@item.AssignmentGuid"
                                                target="_blank" class="btn btn-sm btn-outline-secondary">
@@ -416,15 +456,18 @@
                         No assignments yet
                     </h6>
 
-                    <p class="text-muted mb-3">
-                        Create an assignment for this class to get started.
-                    </p>
+                    @if (User.IsInRole("Teacher"))
+                    {
+                        <p class="text-muted mb-3">
+                            Create an assignment for this class to get started.
+                        </p>
 
-                    <a asp-controller="Assignments" asp-action="Add" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
-                       class="btn btn-primary btn-sm px-3">
-                        <i class="fa-solid fa-plus me-1"></i>
-                        Add Assignment
-                    </a>
+                        <a asp-controller="Assignments" asp-action="Add" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
+                           class="btn btn-primary btn-sm px-3">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Add Assignment
+                        </a>
+                    }
 
                 </div>
             }

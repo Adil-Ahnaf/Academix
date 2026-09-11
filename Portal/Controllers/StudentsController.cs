@@ -1,9 +1,10 @@
 using BusinessLayer.Models;
 using DataAccessLayer.DataAccess;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Portal.Extensions;
+using Portal.Models;
 using Portal.Models.DatatableModels;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Portal.Controllers
 {
@@ -11,15 +12,34 @@ namespace Portal.Controllers
     public class StudentsController : BaseController
     {
         private readonly IStudentsData _studentsData;
+        private readonly IClassesData _classesData;
 
-        public StudentsController(IStudentsData studentsData)
+        public StudentsController(IStudentsData studentsData, IClassesData classesData)
         {
             _studentsData = studentsData;
+            _classesData = classesData;
         }
 
         public IActionResult Index()
         {
             return View();
+        }
+
+        [Route("/StudentDashboard")]
+        public IActionResult StudentDashboard()
+        {
+            var student = _studentsData.GetStudentByAspNetUserId(UserGuid);
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            StudentDashboardViewModel model = new StudentDashboardViewModel
+            {
+                Student = student,
+                AllClasses = _classesData.GetEnrolledClassesByStudentGuid(student.StudentGuid)
+            };
+            return View(model);
         }
 
         public IActionResult LoadTable([FromBody] DtParameters? dtParameters)

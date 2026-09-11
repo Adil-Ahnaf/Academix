@@ -28,7 +28,12 @@ namespace DataAccessLayer.DataAccess
 			return _dataAccess.GetSingle<Students>(SpConstants.GetStudentsById, new{ studentGuid });
 		}
 
-		public void DeleteStudentsById(long id)
+        public Students GetStudentByAspNetUserId(string aspNetUserId)
+        {
+            return _dataAccess.GetSingle<Students>(SpConstants.GetStudentByAspNetUserId, new { aspNetUserId });
+        }
+
+        public void DeleteStudentsById(long id)
 		{
 			_dataAccess.Execute(SpConstants.DeleteStudentsById, new{ id });
 		}

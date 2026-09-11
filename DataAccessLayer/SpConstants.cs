@@ -13,6 +13,7 @@ namespace DataAccessLayer
         public static string InsertStudents = "usp_InsertStudents";
         public static string GetAllStudents = "usp_GetAllStudents";
         public static string GetStudentsById = "usp_GetStudentsById";
+        public static string GetStudentByAspNetUserId = "usp_GetStudentByAspNetUserId";
         public static string DeleteStudentsById = "usp_DeleteStudentsById";
         public static string UpdateStudentsById = "usp_UpdateStudentsById";
         public static string GetEnrolledStudentsByClassGuid = "usp_GetEnrolledStudentsByClassGuid";
@@ -37,6 +38,7 @@ namespace DataAccessLayer
         public static string GetAllAvailableClassesForAStudent = "usp_GetAllAvailableClassesForAStudent";
         public static string GetStudentEnrollClassDetailsByEnrollmentId = "usp_GetStudentEnrollClassDetailsByEnrollmentId";
         public static string GetEnrolledClassesByTeacherGuid = "usp_GetEnrolledClassesByTeacherGuid";
+        public static string GetEnrolledClassesByStudentGuid = "usp_GetEnrolledClassesByStudentGuid";
 
         public static string InsertStudentEnrollments = "usp_InsertStudentEnrollments";
         public static string GetAllStudentEnrollments = "usp_GetAllStudentEnrollments";

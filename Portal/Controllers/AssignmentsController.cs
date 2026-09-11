@@ -42,12 +42,21 @@ namespace Portal.Controllers
             var model = new AssignmentsViewModel();
 
             model.ClassInfo = _classesData.GetClassesByClassGuid(classGuid);
-            model.AllAssignment = _assignmentsData.GetAllAssignmentByClassGuid(classGuid);
-            model.TotalAssignment = model.AllAssignment.Count;
-            model.PublishedAssignment = model.AllAssignment.Count(a => a.IsPublish);
-            model.DraftAssignment = model.AllAssignment.Count(a => !a.IsPublish);
-            model.TotalSubmissions = model.AllAssignment.Sum(a => a.TotalSubmissions);
             model.TotalStudents = _studentsData.GetEnrolledStudentsByClassGuid(classGuid).Count;
+
+            if (User.IsInRole("Teacher"))
+            {
+                model.AllAssignment = _assignmentsData.GetAllAssignmentByClassGuid(classGuid);
+                model.TotalAssignment = model.AllAssignment.Count;
+                model.PublishedAssignment = model.AllAssignment.Count(a => a.IsPublish);
+                model.DraftAssignment = model.AllAssignment.Count(a => !a.IsPublish);
+                model.TotalSubmissions = model.AllAssignment.Sum(a => a.TotalSubmissions);
+            }
+            else
+            {
+                // For students, only show published assignments
+                model.AllAssignment = _assignmentsData.GetAllAssignmentByClassGuid(classGuid).Where(a => a.IsPublish).ToList();
+            }
 
             return View(model);
         }
