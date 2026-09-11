@@ -113,7 +113,7 @@ namespace Portal.Controllers
                 var emailBody = template.Replace("{AssignmentTitle}", model.Title)
                                         .Replace("{ClassName}", model.ClassName)
                                         .Replace("{SectionName}", model.Section)
-                                        .Replace("{TotalMarks}", model.Marks.ToString())
+                                        .Replace("{TotalMarks}", Convert.ToString(model.Marks))
                                         .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
 
                 await _emailHelper.SendBulkEmailAsync(students, "New Assignment Added", emailBody);
@@ -190,6 +190,23 @@ namespace Portal.Controllers
                 IsPublish = model.IsPublish,
                 ModifiedDate = DateTime.Now
             });
+
+            // send notification to students in the class about the published assignment
+            if (model.IsPublish && !existingAssignment.IsPublish)
+            {
+                var students = _studentsData.GetEnrolledStudentsEmailByClassGuid(model.ClassGuid).Select(s => s.EmailAddress).ToList();
+                string template = string.Empty;
+                using (StreamReader reader = new StreamReader(Path.Combine(_hostingEnvironment.WebRootPath, "EmailTemplates", "NewAssignmentAddNotifyEmail.html")))
+                {
+                    template = await reader.ReadToEndAsync();
+                }
+                var emailBody = template.Replace("{AssignmentTitle}", model.Title)
+                                        .Replace("{ClassName}", model.ClassName)
+                                        .Replace("{SectionName}", model.Section)
+                                        .Replace("{TotalMarks}", Convert.ToString(model.Marks))
+                                        .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
+                await _emailHelper.SendBulkEmailAsync(students, "New Assignment Added", emailBody);
+            }
 
             return RedirectToAction("AllAssignments", "Assignments", new { classGuid = model.ClassGuid });
         }
