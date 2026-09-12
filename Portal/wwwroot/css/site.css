@@ -12924,3 +12924,17 @@ body {
 .loadingOverlay:not(.d-none) {
     display: flex !important;
 }
+
+.assignment-title {
+    font-size: 1.1rem;
+    line-height: 1.4;
+}
+
+.assignment-description {
+    height: 42px;
+    line-height: 21px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

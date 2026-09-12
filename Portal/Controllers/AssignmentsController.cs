@@ -325,5 +325,56 @@ namespace Portal.Controllers
             );
         }
 
+        [HttpPost]
+        public IActionResult Submit(Guid assignmentGuid, IFormFile submissionFile)
+        {
+            var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid); 
+            
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            var classInfo = _classesData.GetClassesById(assignment.ClassId);
+            var studentId = _studentsData.GetStudentByAspNetUserId(UserGuid).StudentCode;
+
+            // Class name and section
+            var className = classInfo.ClassName;
+            var section = classInfo.Section;
+
+            // Create folder names
+            var classFolder = $"{className}_Section {section}";
+            var assignmentFolder = assignment.Title;
+
+            // Remove invalid characters from folder names
+            classFolder = string.Join("_", classFolder.Split(Path.GetInvalidFileNameChars()));
+            assignmentFolder = string.Join("_", assignmentFolder.Split(Path.GetInvalidFileNameChars()));
+
+            // Create the submission folder path
+            var submissionFolder = Path.Combine(_hostingEnvironment.WebRootPath,"submissions",classFolder,assignmentFolder);
+
+            // Create directory if it doesn't exist
+            if (!Directory.Exists(submissionFolder))
+            {
+                Directory.CreateDirectory(submissionFolder);
+            }
+
+            // Keep original extension
+            var extension = Path.GetExtension(submissionFile.FileName);
+
+            // Rename file using student ID
+            var fileName = $"{studentId}{extension}";
+
+            var filePath = Path.Combine(submissionFolder, fileName);
+
+            // Save file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                submissionFile.CopyTo(stream);
+            }
+
+            return RedirectToAction("AllAssignments", new { classGuid = classInfo.ClassGuid });
+        }
+
     }
 }
