@@ -1,95 +1,172 @@
 using BusinessLayer.Models;
-using Portal.Models;
-using DataAccessLayer.DataAccess;
 using BusinessLayer.Services.ExportService;
-using Microsoft.AspNetCore.Mvc;
-using Portal.Extensions;
-using Portal.Models.DatatableModels;
+using DataAccessLayer.DataAccess;
+using DocumentFormat.OpenXml.EMMA;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using Portal.Extensions;
+using Portal.Models;
+using Portal.Models.DatatableModels;
 
 namespace Portal.Controllers
 {
     [Authorize]
     public class SubmissionsController : BaseController
-	{
-		private readonly ISubmissionsData _submissionsData;
-		private readonly IExportService _exportService;
-		private readonly IWebHostEnvironment _hostingEnvironment;
-		public SubmissionsController (ISubmissionsData submissionsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
-		{
-			this._submissionsData = submissionsData;
-			this._exportService = exportService;
-			this._hostingEnvironment = hostingEnvironment;
-		}
+    {
+        private readonly ISubmissionsData _submissionsData;
+        private readonly IAssignmentsData _assignmentsData;
+        private readonly IClassesData _classesData;
+        private readonly IStudentsData _studentsData;
+        private readonly IExportService _exportService;
+        private readonly IWebHostEnvironment _hostingEnvironment;
+        public SubmissionsController(ISubmissionsData submissionsData, IAssignmentsData assignmentsData, IClassesData classesData,
+            IStudentsData studentsData, IExportService exportService, IWebHostEnvironment hostingEnvironment)
+        {
+            this._submissionsData = submissionsData;
+            this._assignmentsData = assignmentsData;
+            this._classesData = classesData;
+            this._studentsData = studentsData;
+            this._exportService = exportService;
+            this._hostingEnvironment = hostingEnvironment;
+        }
 
-		public IActionResult Index()
-		{
-			return View();
-		}
-
-		public IActionResult Add()
-		{
-			var model = new SubmissionsViewModelAdd();
-			return View(model);
-		}
+        public IActionResult Index()
+        {
+            return View();
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Insert(SubmissionsViewModelAdd model)
-		{
-            
-            long submissionsId = _submissionsData.InsertSubmissions(new Submissions()
+        public async Task<IActionResult> Insert(Guid assignmentGuid, IFormFile submissionFile)
+        {
+            var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
+
+            if (assignment == null)
             {
-                AssignmentId = model.AssignmentId,
-				StudentId = model.StudentId,
-				FileName = model.FileName,
-				FilePath = model.FilePath,
-				Marks = model.Marks,
-				Feedback = model.Feedback,
-				SubmissionGuid = model.SubmissionGuid,
-				CreatedBy = UserGuid,
-				CreatedDate = DateTime.Now,
-				IsActive = true
-            });
-			return RedirectToAction("Index", "Submissions");
-		}
-		public IActionResult Edit(int id)
-		{
-            SubmissionsViewModelEdit model = new SubmissionsViewModelEdit();
-            var submissions = _submissionsData.GetSubmissionsById(id);
-            if (submissions != null)
-            {
-                model.Id = submissions.Id;
-				model.AssignmentId = submissions.AssignmentId;
-				model.StudentId = submissions.StudentId;
-				model.FileName = submissions.FileName;
-				model.FilePath = submissions.FilePath;
-				model.Marks = submissions.Marks;
-				model.Feedback = submissions.Feedback;
-				model.SubmissionGuid = submissions.SubmissionGuid;
-				model.IsActive = submissions.IsActive;
+                return NotFound();
             }
-            return View(model);
-		}
-        [HttpPost]
-        public async Task<IActionResult> Update(SubmissionsViewModelEdit model)
-		{
-            
-            _submissionsData.UpdateSubmissionsById(new Submissions()
+
+            var classInfo = _classesData.GetClassesById(assignment.ClassId);
+            var studentInfo = _studentsData.GetStudentByAspNetUserId(UserGuid);
+
+            // Folder names using GUIDs
+            string classFolder = classInfo.ClassGuid.ToString();
+            string assignmentFolder = assignment.AssignmentGuid.ToString();
+
+            // Physical folder path
+            string submissionFolder = Path.Combine(
+                _hostingEnvironment.WebRootPath,
+                "submissions",
+                classFolder,
+                assignmentFolder
+            );
+
+            // Create directory if it doesn't exist
+            if (!Directory.Exists(submissionFolder))
             {
-                Id = model.Id,
-				AssignmentId = model.AssignmentId,
-				StudentId = model.StudentId,
-				FileName = model.FileName,
-				FilePath = model.FilePath,
-				Marks = model.Marks,
-				Feedback = model.Feedback,
-				SubmissionGuid = model.SubmissionGuid,
-				IsActive = model.IsActive,
-				ModifiedBy = UserGuid,
-				ModifiedDate = DateTime.Now
+                Directory.CreateDirectory(submissionFolder);
+            }
+
+            // Keep original file extension
+            string extension = Path.GetExtension(submissionFile.FileName);
+
+            // File name
+            string fileName = $"{studentInfo.StudentCode}_Assignment{extension}";
+
+            // Physical file path
+            string physicalFilePath = Path.Combine(submissionFolder, fileName);
+
+            // Save file
+            using (var stream = new FileStream(physicalFilePath, FileMode.Create))
+            {
+                await submissionFile.CopyToAsync(stream);
+            }
+
+            // Web-relative path stored in database
+            string filePath = $"/submissions/{classFolder}/{assignmentFolder}/{fileName}";
+
+            // Insert submission
+            _submissionsData.InsertSubmissions(new Submissions
+            {
+                AssignmentId = assignment.Id,
+                StudentId = studentInfo.Id,
+                FileName = fileName,
+                FilePath = filePath,
+                SubmissionGuid = Guid.NewGuid(),
+                CreatedDate = DateTime.Now,
+                CreatedBy = UserGuid,
+                IsActive = true
             });
-			return RedirectToAction("Index", "Submissions");
-		}
+
+            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = classInfo.ClassGuid });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Update(Guid submissionGuid, IFormFile submissionFile)
+        {
+            var submission = _submissionsData.GetSubmissionBySubmissionGuid(submissionGuid);
+
+            if (submission == null)
+            {
+                return NotFound();
+            }
+
+            var assignment = _assignmentsData.GetAssignmentsById(submission.AssignmentId);
+            var classInfo = _classesData.GetClassesById(assignment.ClassId);
+            var studentInfo = _studentsData.GetStudentByAspNetUserId(UserGuid);
+
+            // Folder names using GUIDs
+            string classFolder = classInfo.ClassGuid.ToString();
+            string assignmentFolder = assignment.AssignmentGuid.ToString();
+
+            // Physical submission folder
+            string submissionFolder = Path.Combine(
+                _hostingEnvironment.WebRootPath,
+                "submissions",
+                classFolder,
+                assignmentFolder
+            );
+
+            // Create directory if it doesn't exist
+            if (!Directory.Exists(submissionFolder))
+            {
+                Directory.CreateDirectory(submissionFolder);
+            }
+
+            // Keep new file extension
+            string extension = Path.GetExtension(submissionFile.FileName);
+
+            // New file name
+            string filename = $"{studentInfo.StudentCode}_Assignment{extension}";
+
+            // New physical file path
+            string physicalPath = Path.Combine(submissionFolder, filename);
+
+            // This replaces the existing file if the name is the same
+            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            {
+                await submissionFile.CopyToAsync(stream);
+            }
+
+            // Web-relative path for database
+            string filePath = $"/submissions/{classFolder}/{assignmentFolder}/{filename}";
+
+            // Update database
+            _submissionsData.UpdateSubmissionsBySubmissionGuid(
+                new Submissions
+                {
+                    SubmissionGuid = submissionGuid,
+                    FileName = filename,
+                    FilePath = filePath,
+                    ModifiedDate = DateTime.Now,
+                    ModifiedBy = UserGuid
+                });
+
+            TempData["Success"] = "Assignment file updated successfully.";
+
+            return RedirectToAction("AllAssignments", "Assignments", new { classGuid = classInfo.ClassGuid });
+        }
+
         [HttpPost("Submissions/LoadTable")]
         public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
         {
@@ -110,16 +187,16 @@ namespace Portal.Controllers
             var totalResultsCount = result.Count();
             if (!string.IsNullOrEmpty(searchBy))
             {
-                result = result.Where(r => r.AssignmentId != null && r.AssignmentId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.FileName != null && r.FileName.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.FilePath != null && r.FilePath.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.Feedback != null && r.Feedback.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.SubmissionGuid != null && r.SubmissionGuid.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.ModifiedBy != null && r.ModifiedBy.ToString().ToUpper().Contains(searchBy.ToUpper())||
-						r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                result = result.Where(r => r.AssignmentId != null && r.AssignmentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.FileName != null && r.FileName.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.FilePath != null && r.FilePath.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Feedback != null && r.Feedback.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.SubmissionGuid != null && r.SubmissionGuid.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.ModifiedBy != null && r.ModifiedBy.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
             }
 
             result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
@@ -139,5 +216,35 @@ namespace Portal.Controllers
                     .ToList()
             });
         }
-	}
+
+        public IActionResult ViewSubmissionFile(Guid submissionGuid)
+        {
+            var submission = _submissionsData.GetSubmissionBySubmissionGuid(submissionGuid);
+
+            if (submission == null)
+            {
+                return NotFound();
+            }
+
+            // Convert web-relative path to physical path
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, submission.FilePath
+                    .TrimStart('/', '\\')
+                    .Replace("/", Path.DirectorySeparatorChar.ToString())
+            );
+
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType(filePath, out var contentType))
+            {
+                contentType = "application/octet-stream";
+            }
+
+            var fileName = Path.GetFileName(filePath);
+
+            // Open file in browser when supported
+            Response.Headers.Append("Content-Disposition", $"inline; filename=\"{fileName}\"");
+
+            return PhysicalFile(filePath, contentType);
+        }
+    }
 }

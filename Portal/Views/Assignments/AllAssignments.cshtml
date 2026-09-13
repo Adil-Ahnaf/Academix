@@ -3,6 +3,15 @@
     ViewData["Title"] = "Assignments";
 }
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
 @if (User.IsInRole("Teacher"))
 {
     <!-- =========================================================
@@ -58,7 +67,7 @@ else
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <form asp-controller="Assignments" asp-action="Submit" method="post" enctype="multipart/form-data">
+                <form asp-controller="Submissions" asp-action="Insert" method="post" enctype="multipart/form-data">
 
                     <div class="modal-body">
 
@@ -85,6 +94,77 @@ else
                         <button type="submit" class="btn btn-primary">
                             <i class="fa-solid fa-paper-plane me-1"></i>
                             Submit
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Assignment Modal -->
+    <div class="modal fade" id="updateAssignmentModal" tabindex="-1"
+         aria-labelledby="updateAssignmentModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateAssignmentModalLabel">
+                        Update Assignment
+                    </h5>
+
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <form asp-controller="Submissions" asp-action="Update" method="post" enctype="multipart/form-data">
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="submissionGuid" name="submissionGuid" />
+
+                        <!-- Current File -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">
+                                Current File
+                            </label>
+
+                            <div class="border rounded p-2">
+                                <i class="fa-solid fa-file me-2 text-primary"></i>
+
+                                <a id="currentSubmissionFile" href="#" target="_blank" class="text-decoration-none">
+                                    <i class="fa-solid fa-eye me-1"></i>
+                                    Open File
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- New File -->
+                        <div class="mb-3">
+                            <label for="submissionFile" class="form-label fw-medium">
+                                Replace File
+                            </label>
+
+                            <input type="file" class="form-control" id="submissionFile" name="submissionFile"
+                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" />
+
+                            <div class="form-text">
+                                Upload a new file only if you want to replace the current file.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-upload me-1"></i>
+                            Update
                         </button>
                     </div>
 
@@ -321,20 +401,40 @@ else
 
                                         </div>
 
-
-                                        @if (item.IsPublish)
+                                        @if (User.IsInRole("Teacher"))
                                         {
-                                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3 py-2">
-                                                <i class="fa-solid fa-circle-check me-1"></i>
-                                                Published
-                                            </span>
+                                            if (item.IsPublish)
+                                            {
+                                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3 py-2">
+                                                    <i class="fa-solid fa-circle-check me-1"></i>
+                                                    Published
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning px-3 py-2">
+                                                    <i class="fa-solid fa-file-pen me-1"></i>
+                                                    Draft
+                                                </span>
+                                            }
+
                                         }
                                         else
                                         {
-                                            <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning px-3 py-2">
-                                                <i class="fa-solid fa-file-pen me-1"></i>
-                                                Draft
-                                            </span>
+                                            if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
+                                            {
+                                                <span class="badge rounded-pill bg-info bg-opacity-10 text-info px-3 py-2">
+                                                    <i class="fa-solid fa-check-circle me-1"></i>
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2">
+                                                    <i class="fa-solid fa-clock me-1"></i>
+                                                    Not Submitted
+                                                </span>
+                                            }
                                         }
 
                                     </div>
@@ -478,12 +578,55 @@ else
                                         }
                                         else
                                         {
-                                            <!-- Submit Assignment -->
-                                            <button type="button" class="btn btn-success submit-assignment" data-bs-toggle="modal"
-                                                    data-bs-target="#submitAssignmentModal" data-assignment-guid="@item.AssignmentGuid">
-                                                <i class="fa-solid fa-upload me-1"></i>
-                                                Submit Assignment
-                                            </button>
+                                            <!-- Check if the assignment deadline has passed -->
+                                            if (item.Deadline > DateTime.Now)
+                                            {
+                                                if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
+                                                {
+                                                    var submission = Model.AllSubmissions.First(s => s.AssignmentId == item.Id);
+
+                                                    <!-- Update Assignment -->
+                                                    <button type="button" class="btn btn-warning submit-assignment" data-bs-toggle="modal"
+                                                            data-bs-target="#updateAssignmentModal"
+                                                            data-submission-guid="@submission.SubmissionGuid"
+                                                            data-file-path="@submission.FilePath"
+                                                            data-file-name="@System.IO.Path.GetFileName(submission.FilePath)"
+                                                            data-view-url="@Url.Action("ViewSubmissionFile", "Submissions",
+                                                                                                                                                                                                 new { submissionGuid = submission.SubmissionGuid })">
+                                                        <i class="fa-solid fa-upload me-1"></i>
+                                                        Update
+                                                    </button>
+                                                }
+
+                                                else
+                                                {
+                                                    <!-- Submit Assignment -->
+                                                    <button type="button" class="btn btn-success submit-assignment" data-bs-toggle="modal"
+                                                            data-bs-target="#submitAssignmentModal" data-assignment-guid="@item.AssignmentGuid">
+                                                        <i class="fa-solid fa-upload me-1"></i>
+                                                        Submit
+                                                    </button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
+                                                {
+                                                    <!-- View Assignment Mark -->
+                                                    <a asp-controller="Assignments" asp-action="ViewAssignmentMarks" asp-route-assignmentGuid="@item.AssignmentGuid"
+                                                       class="btn btn-info">
+                                                        <i class="fa-solid fa-eye me-1"></i>
+                                                        View Assignment Mark
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-secondary" disabled>
+                                                        <i class="fa-solid fa-clock me-1"></i>
+                                                        Deadline Passed
+                                                    </button>
+                                                }
+                                            }
                                         }
 
                                     </div>
@@ -537,11 +680,9 @@ else
 </div>
 
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
-
     <script>
-        $(document).on("click", ".delete-btn", function() {
+        $(document).on("click", ".delete-btn", function () {
 
             var id = $(this).data("id");
             var title = $(this).data("title");
@@ -551,11 +692,29 @@ else
 
         });
 
-        $(document).on('click', '.submit-assignment', function() {
+        $(document).on('click', '.submit-assignment', function () {
 
             var assignmentGuid = $(this).data('assignment-guid');
 
             $('#assignmentGuid').val(assignmentGuid);
         });
+
+        $(document).on("click", ".submit-assignment", function () {
+
+            var submissionGuid = $(this).data("submission-guid");
+            var fileName = $(this).data("file-name");
+            var viewUrl = $(this).data("view-url");
+
+            $("#submissionGuid").val(submissionGuid);
+
+            $("#currentSubmissionFile").text(fileName).attr("href", viewUrl);
+        });
+
+        setTimeout(function () {
+            var alert = document.querySelector('.alert');
+            if (alert) {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+            }
+        }, 3000);
     </script>
 }

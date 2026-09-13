@@ -17,15 +17,17 @@ namespace Portal.Controllers
         private readonly IAssignmentsData _assignmentsData;
         private readonly IClassesData _classesData;
         private readonly IStudentsData _studentsData;
+        private readonly ISubmissionsData _submissionsData;
         private readonly IWebHostEnvironment _hostingEnvironment;
         private readonly IEmailHelper _emailHelper;
         private readonly IConfiguration _configuration;
         public AssignmentsController(IAssignmentsData assignmentsData, IClassesData classesData, IStudentsData studentsData,
-            IWebHostEnvironment hostingEnvironment, IEmailHelper emailHelper, IConfiguration configuration)
+            ISubmissionsData submissionsData, IWebHostEnvironment hostingEnvironment, IEmailHelper emailHelper, IConfiguration configuration)
         {
             _assignmentsData = assignmentsData;
             _classesData = classesData;
             _studentsData = studentsData;
+            _submissionsData = submissionsData;
             _hostingEnvironment = hostingEnvironment;
             _emailHelper = emailHelper;
             _configuration = configuration;
@@ -56,6 +58,7 @@ namespace Portal.Controllers
             {
                 // For students, only show published assignments
                 model.AllAssignment = _assignmentsData.GetAllAssignmentByClassGuid(classGuid).Where(a => a.IsPublish).ToList();
+                model.AllSubmissions = _submissionsData.GetSubmissionsByStudentAspNetUserId(UserGuid);
             }
 
             return View(model);
@@ -76,22 +79,41 @@ namespace Portal.Controllers
         {
             string? filePath = null;
 
+            // Generate AssignmentGuid before saving the file
+            Guid assignmentGuid = Guid.NewGuid();
+
             if (model.FilePath != null && model.FilePath.Length > 0)
             {
-                string folderName = $"{model.ClassName}_{model.Section}";
-                string pathToSave = Path.Combine(_hostingEnvironment.WebRootPath, "attachments", folderName);
+                string classFolder = model.ClassGuid.ToString();
+                string assignmentFolder = assignmentGuid.ToString();
+
+                string pathToSave = Path.Combine(
+                    _hostingEnvironment.WebRootPath,
+                    "attachments",
+                    classFolder,
+                    assignmentFolder
+                );
 
                 if (!Directory.Exists(pathToSave))
                 {
                     Directory.CreateDirectory(pathToSave);
                 }
 
-                filePath = Path.Combine(pathToSave, model.FilePath.FileName);
+                // Keep original file extension
+                string extension = Path.GetExtension(model.FilePath.FileName);
+                string fileName = Path.GetFileNameWithoutExtension(model.FilePath.FileName) + extension;
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                // Physical path
+                string physicalFilePath = Path.Combine(pathToSave, fileName);
+
+                // Save file
+                using (var fileStream = new FileStream(physicalFilePath, FileMode.Create))
                 {
                     await model.FilePath.CopyToAsync(fileStream);
                 }
+
+                // Store web-relative path in database
+                filePath = $"/attachments/{classFolder}/{assignmentFolder}/{fileName}";
             }
 
             long assignmentsId = _assignmentsData.InsertAssignments(new Assignments()
@@ -103,27 +125,32 @@ namespace Portal.Controllers
                 Marks = model.Marks,
                 Deadline = model.Deadline,
                 IsPublish = model.IsPublish,
+                AssignmentGuid = assignmentGuid,
                 CreatedDate = DateTime.Now,
                 IsActive = true
             });
 
-            // Send notification to students in the class about the new assignment
+            // Send notification to students when assignment is published
             if (model.IsPublish)
             {
-                // Implementation for sending notification
                 var students = _studentsData.GetEnrolledStudentsEmailByClassGuid(model.ClassGuid).Select(s => s.EmailAddress).ToList();
 
                 string template = string.Empty;
-                using (StreamReader reader = new StreamReader(Path.Combine(_hostingEnvironment.WebRootPath, "EmailTemplates", "NewAssignmentAddNotifyEmail.html")))
+
+                using (StreamReader reader = new StreamReader(Path.Combine(
+                        _hostingEnvironment.WebRootPath,
+                        "EmailTemplates",
+                        "NewAssignmentAddNotifyEmail.html")))
                 {
                     template = await reader.ReadToEndAsync();
                 }
 
-                var emailBody = template.Replace("{AssignmentTitle}", model.Title)
-                                        .Replace("{ClassName}", model.ClassName)
-                                        .Replace("{SectionName}", model.Section)
-                                        .Replace("{TotalMarks}", Convert.ToString(model.Marks))
-                                        .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
+                var emailBody = template
+                    .Replace("{AssignmentTitle}", model.Title)
+                    .Replace("{ClassName}", model.ClassName)
+                    .Replace("{SectionName}", model.Section)
+                    .Replace("{TotalMarks}", Convert.ToString(model.Marks))
+                    .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
 
                 await _emailHelper.SendBulkEmailAsync(students, "New Assignment Added", emailBody);
             }
@@ -165,29 +192,59 @@ namespace Portal.Controllers
 
             if (model.FilePath != null && model.FilePath.Length > 0)
             {
-                // Save the new file
-                string folderName = $"{model.ClassName}_{model.Section}";
-                string pathToSave = Path.Combine(_hostingEnvironment.WebRootPath, "attachments", folderName);
+                string classFolder = model.ClassGuid.ToString();
+                string assignmentFolder = model.AssignmentGuid.ToString();
+
+                string pathToSave = Path.Combine(
+                    _hostingEnvironment.WebRootPath,
+                    "attachments",
+                    classFolder,
+                    assignmentFolder
+                );
+
                 if (!Directory.Exists(pathToSave))
                 {
                     Directory.CreateDirectory(pathToSave);
                 }
-                filePath = Path.Combine(pathToSave, model.FilePath.FileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+
+                // Keep original extension
+                string extension = Path.GetExtension(model.FilePath.FileName);
+
+                string fileName = Path.GetFileNameWithoutExtension(model.FilePath.FileName) + extension;
+
+                // New physical file path
+                string newPhysicalFilePath = Path.Combine(pathToSave, fileName);
+
+                // Save new file
+                using (var fileStream = new FileStream(newPhysicalFilePath, FileMode.Create))
                 {
                     await model.FilePath.CopyToAsync(fileStream);
                 }
 
                 // Delete previous attachment
-                if (!string.IsNullOrEmpty(existingAssignment.FilePath) && System.IO.File.Exists(existingAssignment.FilePath))
+                if (!string.IsNullOrEmpty(existingAssignment.FilePath))
                 {
-                    System.IO.File.Delete(existingAssignment.FilePath);
+                    string oldPhysicalFilePath = Path.Combine(
+                        _hostingEnvironment.WebRootPath,
+                        existingAssignment.FilePath
+                            .TrimStart('/', '\\')
+                            .Replace(
+                                "/",
+                                Path.DirectorySeparatorChar.ToString()
+                            )
+                    );
+
+                    if (System.IO.File.Exists(oldPhysicalFilePath))
+                    {
+                        System.IO.File.Delete(oldPhysicalFilePath);
+                    }
                 }
 
-                filePath = Path.Combine(pathToSave, model.FilePath.FileName);
+                // Store web-relative path in database
+                filePath = $"/attachments/{classFolder}/{assignmentFolder}/{fileName}";
             }
 
-            // update the assignment with the new values
+            // Update assignment
             _assignmentsData.UpdateAssignmentsById(new Assignments()
             {
                 Id = existingAssignment.Id,
@@ -200,20 +257,28 @@ namespace Portal.Controllers
                 ModifiedDate = DateTime.Now
             });
 
-            // send notification to students in the class about the published assignment
+            // Send notification when draft becomes published
             if (model.IsPublish && !existingAssignment.IsPublish)
             {
                 var students = _studentsData.GetEnrolledStudentsEmailByClassGuid(model.ClassGuid).Select(s => s.EmailAddress).ToList();
+
                 string template = string.Empty;
-                using (StreamReader reader = new StreamReader(Path.Combine(_hostingEnvironment.WebRootPath, "EmailTemplates", "NewAssignmentAddNotifyEmail.html")))
+
+                using (StreamReader reader = new StreamReader(Path.Combine(
+                        _hostingEnvironment.WebRootPath,
+                        "EmailTemplates",
+                        "NewAssignmentAddNotifyEmail.html")))
                 {
                     template = await reader.ReadToEndAsync();
                 }
-                var emailBody = template.Replace("{AssignmentTitle}", model.Title)
-                                        .Replace("{ClassName}", model.ClassName)
-                                        .Replace("{SectionName}", model.Section)
-                                        .Replace("{TotalMarks}", Convert.ToString(model.Marks))
-                                        .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
+
+                var emailBody = template
+                    .Replace("{AssignmentTitle}", model.Title)
+                    .Replace("{ClassName}", model.ClassName)
+                    .Replace("{SectionName}", model.Section)
+                    .Replace("{TotalMarks}", Convert.ToString(model.Marks))
+                    .Replace("{Deadline}", model.Deadline.ToString("dd MMM yyyy"));
+
                 await _emailHelper.SendBulkEmailAsync(students, "New Assignment Added", emailBody);
             }
 
@@ -295,14 +360,15 @@ namespace Portal.Controllers
             var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
 
             if (assignment == null)
-                return NotFound();
-
-            var filePath = assignment.FilePath;
-
-            if (string.IsNullOrWhiteSpace(filePath) || !System.IO.File.Exists(filePath))
             {
                 return NotFound();
             }
+
+            // Convert web-relative path to physical path
+            var filePath = Path.Combine(_hostingEnvironment.WebRootPath, assignment.FilePath
+                    .TrimStart('/', '\\')
+                    .Replace("/", Path.DirectorySeparatorChar.ToString())
+            );
 
             var provider = new FileExtensionContentTypeProvider();
 
@@ -314,67 +380,9 @@ namespace Portal.Controllers
             var fileName = Path.GetFileName(filePath);
 
             // Open file in browser when supported
-            Response.Headers.Append(
-                "Content-Disposition",
-                $"inline; filename=\"{fileName}\""
-            );
+            Response.Headers.Append("Content-Disposition", $"inline; filename=\"{fileName}\"");
 
-            return PhysicalFile(
-                filePath,
-                contentType
-            );
+            return PhysicalFile(filePath, contentType);
         }
-
-        [HttpPost]
-        public IActionResult Submit(Guid assignmentGuid, IFormFile submissionFile)
-        {
-            var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid); 
-            
-            if (assignment == null)
-            {
-                return NotFound();
-            }
-
-            var classInfo = _classesData.GetClassesById(assignment.ClassId);
-            var studentId = _studentsData.GetStudentByAspNetUserId(UserGuid).StudentCode;
-
-            // Class name and section
-            var className = classInfo.ClassName;
-            var section = classInfo.Section;
-
-            // Create folder names
-            var classFolder = $"{className}_Section {section}";
-            var assignmentFolder = assignment.Title;
-
-            // Remove invalid characters from folder names
-            classFolder = string.Join("_", classFolder.Split(Path.GetInvalidFileNameChars()));
-            assignmentFolder = string.Join("_", assignmentFolder.Split(Path.GetInvalidFileNameChars()));
-
-            // Create the submission folder path
-            var submissionFolder = Path.Combine(_hostingEnvironment.WebRootPath,"submissions",classFolder,assignmentFolder);
-
-            // Create directory if it doesn't exist
-            if (!Directory.Exists(submissionFolder))
-            {
-                Directory.CreateDirectory(submissionFolder);
-            }
-
-            // Keep original extension
-            var extension = Path.GetExtension(submissionFile.FileName);
-
-            // Rename file using student ID
-            var fileName = $"{studentId}{extension}";
-
-            var filePath = Path.Combine(submissionFolder, fileName);
-
-            // Save file
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                submissionFile.CopyTo(stream);
-            }
-
-            return RedirectToAction("AllAssignments", new { classGuid = classInfo.ClassGuid });
-        }
-
     }
 }

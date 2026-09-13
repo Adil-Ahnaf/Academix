@@ -15,7 +15,7 @@ namespace DataAccessLayer.DataAccess
 
 		public long InsertSubmissions(Submissions submissions)
 		{
-			return _dataAccess.ExecuteScalar<long>(SpConstants.InsertSubmissions, new{ submissions.AssignmentId, submissions.StudentId, submissions.FileName, submissions.FilePath, submissions.Marks, submissions.Feedback, submissions.SubmissionGuid, submissions.CreatedDate, submissions.CreatedBy, submissions.IsActive });
+			return _dataAccess.ExecuteScalar<long>(SpConstants.InsertSubmissions, new{ submissions.AssignmentId, submissions.StudentId, submissions.FileName, submissions.FilePath, submissions.SubmissionGuid, submissions.CreatedDate, submissions.CreatedBy, submissions.IsActive });
 		}
 
 		public List<Submissions> GetAllSubmissions()
@@ -38,5 +38,19 @@ namespace DataAccessLayer.DataAccess
 			_dataAccess.Execute(SpConstants.UpdateSubmissionsById, new{ submissions.Id, submissions.AssignmentId, submissions.StudentId, submissions.FileName, submissions.FilePath, submissions.Marks, submissions.Feedback, submissions.SubmissionGuid, submissions.ModifiedDate, submissions.ModifiedBy, submissions.IsActive });
 		}
 
-	}
+        public List<Submissions> GetSubmissionsByStudentAspNetUserId(string aspNetUserId)
+        {
+            return _dataAccess.GetList<Submissions>(SpConstants.GetSubmissionsByStudentAspNetUserId, new { aspNetUserId });
+        }
+
+        public Submissions GetSubmissionBySubmissionGuid(Guid submissionGuid)
+        {
+            return _dataAccess.GetSingle<Submissions>(SpConstants.GetSubmissionBySubmissionGuid, new { submissionGuid });
+        }
+
+        public void UpdateSubmissionsBySubmissionGuid(Submissions submissions)
+        {
+            _dataAccess.Execute(SpConstants.UpdateSubmissionsBySubmissionGuid, new { submissions.FileName, submissions.FilePath, submissions.SubmissionGuid, submissions.ModifiedDate, submissions.ModifiedBy });
+        }
+    }
 }

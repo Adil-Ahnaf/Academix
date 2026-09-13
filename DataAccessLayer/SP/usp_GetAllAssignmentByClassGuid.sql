@@ -11,12 +11,12 @@ BEGIN
 	SET NOCOUNT ON;
 
 	-- find total submission of each assignment
-	SELECT AssignmentId, COUNT(*) AS TotalSubmission
+	SELECT AssignmentId, COUNT(*) AS TotalSubmissions
 	INTO #TempSubmission
 	FROM [dbo].[Submissions]
 	GROUP BY AssignmentId;
 
-    SELECT A.*, S.TotalSubmission
+    SELECT A.*, S.TotalSubmissions
 	FROM [dbo].[Assignments] AS A
 	INNER JOIN [dbo].[Classes] AS C ON C.Id = A.ClassId
 	LEFT JOIN #TempSubmission AS S ON S.AssignmentId = A.Id

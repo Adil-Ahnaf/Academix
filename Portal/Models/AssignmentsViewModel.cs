@@ -6,6 +6,7 @@ namespace Portal.Models
     {
         public Classes ClassInfo { get; set; }
         public List<Assignments> AllAssignment { get; set; }
+        public List<Submissions> AllSubmissions { get; set; }
         public int TotalAssignment { get; set; }
         public int PublishedAssignment { get; set; }
         public int DraftAssignment { get; set; }

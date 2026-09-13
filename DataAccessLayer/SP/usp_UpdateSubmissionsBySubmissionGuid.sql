@@ -1,3 +1,9 @@
+USE [AcademixDB]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
 CREATE OR ALTER PROCEDURE [dbo].[usp_UpdateSubmissionsBySubmissionGuid]
 	@FileName nvarchar(255),
 	@FilePath nvarchar(500),
@@ -11,3 +17,4 @@ BEGIN
 	UPDATE [dbo].[Submissions] SET [FileName] = @FileName, FilePath = @FilePath, ModifiedDate = @ModifiedDate, ModifiedBy = @ModifiedBy
 	WHERE SubmissionGuid = @SubmissionGuid;
 END
+GO

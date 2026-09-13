@@ -3,8 +3,6 @@ CREATE OR ALTER PROCEDURE [dbo].[usp_InsertSubmissions]
 	@StudentId bigint,
 	@FileName nvarchar(255),
 	@FilePath nvarchar(500),
-	@Marks decimal,
-	@Feedback nvarchar(max),
 	@SubmissionGuid uniqueidentifier,
 	@CreatedDate datetime,
 	@CreatedBy nvarchar(450),
@@ -13,8 +11,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
-    INSERT INTO [dbo].[Submissions](AssignmentId, StudentId, FileName, FilePath, Marks, Feedback, SubmissionGuid, CreatedDate, CreatedBy, IsActive)
-	VALUES(@AssignmentId, @StudentId, @FileName, @FilePath, @Marks, @Feedback, @SubmissionGuid, @CreatedDate, @CreatedBy, @IsActive);
+    INSERT INTO [dbo].[Submissions](AssignmentId, StudentId, [FileName], FilePath, SubmissionGuid, CreatedDate, CreatedBy, IsActive)
+	VALUES(@AssignmentId, @StudentId, @FileName, @FilePath, @SubmissionGuid, @CreatedDate, @CreatedBy, @IsActive);
 
 	SELECT @@IDENTITY;
 END
