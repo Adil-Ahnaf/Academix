@@ -1,0 +1,108 @@
+﻿@model MarkSubmissionsViewModel
+@{
+    ViewData["Title"] = "Mark Submissions";
+}
+
+<div class="container-fluid px-4">
+
+    <h4 class="my-4">Assignment Information</h4>
+
+    <!-- Assignment Information -->
+    <div class="card shadow-sm border-1 mb-4">
+        <div class="card-body p-4">
+
+            <div class="row align-items-center">
+
+                <!-- Assignment Details -->
+                <div class="col-md-6">
+                    <input type="hidden" id="assignmentGuid" value="@Model.AssignmentInfo?.AssignmentGuid" />
+
+                    <p class="text-muted mb-2">
+                        <i class="fa-solid fa-file-alt text-primary me-2"></i>
+                        <strong class="text-dark">Assignment:</strong>
+                        @Model.AssignmentInfo?.Title
+                    </p>
+
+                    <p class="text-muted mb-2">
+                        <i class="fa-solid fa-calendar-alt text-primary me-2"></i>
+                        <strong class="text-dark">Deadline:</strong>
+                        @Model.AssignmentInfo?.Deadline
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        <i class="fa-solid fa-star text-primary me-2"></i>
+                        <strong class="text-dark">Total Marks:</strong>
+                        @Model.AssignmentInfo?.Marks
+                    </p>
+                </div>
+
+                <!-- Class Information -->
+                <div class="col-md-6 border-start">
+                    <div class="ps-md-4">
+
+                        <input type="hidden" id="classGuid" value="" />
+
+                        <p class="text-muted mb-2">
+                            <i class="fa-solid fa-chalkboard text-primary me-2"></i>
+                            <strong class="text-dark">Class Name:</strong>
+                            @Model.ClassInfo?.ClassName
+                        </p>
+
+                        <p class="text-muted mb-2">
+                            <i class="fa-solid fa-book text-primary me-2"></i>
+                            <strong class="text-dark">Subject:</strong>
+                            @Model.ClassInfo?.SubjectName
+                        </p>
+
+                        <p class="text-muted mb-0">
+                            <i class="fa-solid fa-layer-group text-primary me-2"></i>
+                            <strong class="text-dark">Section:</strong>
+                            @Model.ClassInfo?.Section
+                        </p>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Enrolled Student List -->
+    <div class="card my-4">
+        <div class="card-header fs-5 fw-semibold">
+            <i class="fas fa-table me-1"></i>
+            Students List
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <table id="students_table" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Student ID</th>
+                                <th>Full Name</th>
+                                <th>Submitted File</th>
+                                <th>Marks</th>
+                                <th>Feedback</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/lib/datatables/css/dataTables.bootstrap5.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="~/lib/datatables/js/jquery.dataTables.js" asp-append-version="true"></script>
+    <script src="~/lib/datatables/js/dataTables.bootstrap5.js" asp-append-version="true"></script>
+
+    <script src="~/lib/datatables-buttons/dataTables.buttons.min.js" asp-append-version="true"></script>
+    <script src="~/js/assignment-mark-submissions.js" asp-append-version="true"></script>
+}

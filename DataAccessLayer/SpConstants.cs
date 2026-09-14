@@ -63,6 +63,7 @@ namespace DataAccessLayer
         public static string GetSubmissionsByStudentAspNetUserId = "usp_GetSubmissionsByStudentAspNetUserId";
         public static string GetSubmissionBySubmissionGuid = "usp_GetSubmissionBySubmissionGuid";
         public static string UpdateSubmissionsBySubmissionGuid = "usp_UpdateSubmissionsBySubmissionGuid";  
+        public static string GetAllSubmissionsByAssignmentGuid = "usp_GetAllSubmissionsByAssignmentGuid";
 
         public static string InsertTeacherEnrollments = "usp_InsertTeacherEnrollments";
         public static string GetAllTeacherEnrollments = "usp_GetAllTeacherEnrollments";

@@ -9,10 +9,15 @@ namespace BusinessLayer.Models
 		public long AssignmentId { get; set; }
 		[Display(Name = "Student Id")]
 		public long StudentId { get; set; }
-		[Display(Name = "File Name")]
-		public string FileName { get; set; }
+        [Display(Name = "Student Code")]
+        public string? StudentCode { get; set; }
+
+        [Display(Name = "Full Name")]
+        public string? FullName { get; set; }
+        [Display(Name = "File Name")]
+		public string? FileName { get; set; }
 		[Display(Name = "File Path")]
-		public string FilePath { get; set; }
+		public string? FilePath { get; set; }
 		[Display(Name = "Marks")]
 		public decimal? Marks { get; set; }
 		[Display(Name = "Feedback")]

@@ -12,5 +12,6 @@ namespace DataAccessLayer.DataAccess
 		List<Submissions> GetSubmissionsByStudentAspNetUserId(string aspNetUserId);
 		Submissions GetSubmissionBySubmissionGuid(Guid submissionGuid);
 		void UpdateSubmissionsBySubmissionGuid(Submissions submissions);
+        List<Submissions> GetAllSubmissionsByAssignmentGuid(Guid assignmentGuid);
     }
 }

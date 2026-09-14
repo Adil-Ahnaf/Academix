@@ -52,5 +52,10 @@ namespace DataAccessLayer.DataAccess
         {
             _dataAccess.Execute(SpConstants.UpdateSubmissionsBySubmissionGuid, new { submissions.FileName, submissions.FilePath, submissions.SubmissionGuid, submissions.ModifiedDate, submissions.ModifiedBy });
         }
+
+        public List<Submissions> GetAllSubmissionsByAssignmentGuid(Guid assignmentGuid)
+        {
+            return _dataAccess.GetList<Submissions>(SpConstants.GetAllSubmissionsByAssignmentGuid, new { assignmentGuid });
+        }
     }
 }

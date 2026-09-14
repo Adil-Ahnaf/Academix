@@ -31,9 +31,14 @@ namespace Portal.Controllers
             this._hostingEnvironment = hostingEnvironment;
         }
 
-        public IActionResult Index()
+        public IActionResult MarkSubmissions(Guid assignmentGuid)
         {
-            return View();
+            var model = new MarkSubmissionsViewModel();
+
+            model.AssignmentInfo = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
+            model.ClassInfo = _classesData.GetClassesById(model.AssignmentInfo.ClassId);
+
+            return View(model);
         }
 
         [HttpPost]
@@ -179,53 +184,115 @@ namespace Portal.Controllers
             return RedirectToAction("AllAssignments", "Assignments", new { classGuid = classInfo.ClassGuid });
         }
 
-        [HttpPost("Submissions/LoadTable")]
-        public async Task<IActionResult> LoadTable([FromBody] DtParameters dtParameters)
+        public IActionResult LoadTable([FromBody] DtParameters? dtParameters)
         {
-            var searchBy = dtParameters.Search?.Value;
-
-            // if we have an empty search then just order the results by Id ascending
-            var orderCriteria = "Id";
-            var orderAscendingDirection = true;
-
-            if (dtParameters.Order != null)
+            if (dtParameters == null)
             {
-                // in this example we just default sort on the 1st column
-                orderCriteria = dtParameters.Columns[dtParameters.Order[0].Column].Data;
-                orderAscendingDirection = dtParameters.Order[0].Dir.ToString().ToLower() == "asc";
+                return BadRequest(new
+                {
+                    error = "DataTables parameters are null."
+                });
             }
 
-            var result = _submissionsData.GetAllSubmissions().AsQueryable();
-            var totalResultsCount = result.Count();
-            if (!string.IsNullOrEmpty(searchBy))
+            Guid? assignmentGuid = dtParameters?.AssignmentGuid;
+            string? searchBy = dtParameters.Search?.Value;
+            string orderCriteria = "Id";
+            bool orderAscendingDirection = true;
+
+            if (dtParameters.Order != null && dtParameters.Order.Length > 0 && dtParameters.Columns != null)
             {
-                result = result.Where(r => r.AssignmentId != null && r.AssignmentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.StudentId != null && r.StudentId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.FileName != null && r.FileName.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.FilePath != null && r.FilePath.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Feedback != null && r.Feedback.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.SubmissionGuid != null && r.SubmissionGuid.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.ModifiedBy != null && r.ModifiedBy.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                int columnIndex = dtParameters.Order[0].Column;
+
+                if (columnIndex >= 0 && columnIndex < dtParameters.Columns.Length)
+                {
+                    string? requestedColumn = dtParameters.Columns[columnIndex].Data;
+
+                    if (!string.IsNullOrWhiteSpace(requestedColumn))
+                    {
+                        orderCriteria = requestedColumn;
+                    }
+                }
+                orderAscendingDirection = !string.Equals(dtParameters.Order[0].Dir, "desc", StringComparison.OrdinalIgnoreCase);
             }
 
-            result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
+            var result = _submissionsData.GetAllSubmissionsByAssignmentGuid(assignmentGuid.Value).AsQueryable();
 
-            // now just get the count of items (without the skip and take) - eg how many could be returned with filtering
-            var filteredResultsCount = result.Count();
+            int totalResultsCount = result.Count();
 
+            if (!string.IsNullOrWhiteSpace(searchBy))
+            {
+                string search = searchBy.Trim();
+
+                result = result.Where(r =>
+                    (r.StudentCode != null &&
+                     r.StudentCode.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    (r.FullName != null &&
+                     r.FullName.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    ||
+
+                    (r.FileName != null &&
+                     r.FileName.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+
+                    || 
+                    
+                    (r.Marks != null &&
+                     r.Marks.ToString().Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+                    ||
+
+                    (r.Feedback != null &&
+                     r.Feedback.Contains(
+                         search,
+                         StringComparison.OrdinalIgnoreCase))
+                );
+            }
+
+            result = orderAscendingDirection
+                ? result.OrderByDynamic(
+                    orderCriteria,
+                    DtOrderDir.Asc)
+
+                : result.OrderByDynamic(
+                    orderCriteria,
+                    DtOrderDir.Desc);
+
+            int filteredResultsCount = result.Count();
+
+            int start = Math.Max(
+                dtParameters.Start,
+                0);
+
+            int length = dtParameters.Length;
+
+
+            if (length <= 0)
+            {
+                length = 10;
+            }
+
+
+            var data = result
+                .Skip(start)
+                .Take(length)
+                .ToList();
 
             return Json(new DtResult<Submissions>
             {
                 Draw = dtParameters.Draw,
                 RecordsTotal = totalResultsCount,
                 RecordsFiltered = filteredResultsCount,
-                Data = result
-                    .Skip(dtParameters.Start)
-                    .Take(dtParameters.Length)
-                    .ToList()
+                Data = data
             });
         }
 

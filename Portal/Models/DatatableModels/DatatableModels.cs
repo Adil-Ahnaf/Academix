@@ -45,6 +45,7 @@ namespace Portal.Models.DatatableModels
         public DtSearch? Search { get; set; }
 
         public Guid? ClassGuid { get; set; }
+        public Guid? AssignmentGuid { get; set; }
 
         public IEnumerable<string>? AdditionalValues { get; set; }
 
