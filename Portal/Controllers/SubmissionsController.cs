@@ -113,54 +113,66 @@ namespace Portal.Controllers
 
             var assignment = _assignmentsData.GetAssignmentsById(submission.AssignmentId);
             var classInfo = _classesData.GetClassesById(assignment.ClassId);
-            var studentInfo = _studentsData.GetStudentByAspNetUserId(UserGuid);
 
-            // Folder names using GUIDs
-            string classFolder = classInfo.ClassGuid.ToString();
-            string assignmentFolder = assignment.AssignmentGuid.ToString();
-
-            // Physical submission folder
-            string submissionFolder = Path.Combine(
+            // Get existing physical file path from database
+            string existingFilePath = Path.Combine(
                 _hostingEnvironment.WebRootPath,
-                "submissions",
-                classFolder,
-                assignmentFolder
+                submission.FilePath.TrimStart('/')
+                    .Replace("/", Path.DirectorySeparatorChar.ToString())
             );
 
-            // Create directory if it doesn't exist
+            // Retain the existing file name (without extension)
+            string oldFileName = submission.FileName;
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(oldFileName);
+
+            string newExtension = Path.GetExtension(submissionFile.FileName);
+            string newFileName = fileNameWithoutExtension + newExtension;
+
+            // Remove existing file
+            if (System.IO.File.Exists(existingFilePath))
+            {
+                System.IO.File.Delete(existingFilePath);
+            }
+
+            // Get the existing folder
+            string submissionFolder = Path.GetDirectoryName(existingFilePath);
+
+            // Make sure folder exists
             if (!Directory.Exists(submissionFolder))
             {
                 Directory.CreateDirectory(submissionFolder);
             }
 
-            // Keep new file extension
+            // Get new file extension
             string extension = Path.GetExtension(submissionFile.FileName);
 
-            // New file name
-            string filename = $"{studentInfo.StudentCode}_Assignment{extension}";
-
             // New physical file path
-            string physicalPath = Path.Combine(submissionFolder, filename);
+            string newPhysicalPath = Path.Combine(submissionFolder, newFileName);
 
-            // This replaces the existing file if the name is the same
-            using (var stream = new FileStream(physicalPath, FileMode.Create))
+            // Save new file
+            using (var stream = new FileStream(newPhysicalPath, FileMode.Create))
             {
                 await submissionFile.CopyToAsync(stream);
             }
 
-            // Web-relative path for database
-            string filePath = $"/submissions/{classFolder}/{assignmentFolder}/{filename}";
+            // Update database if only the file name/extension changes
+            string newFilePath = submission.FilePath;
 
-            // Update database
-            _submissionsData.UpdateSubmissionsBySubmissionGuid(
-                new Submissions
-                {
-                    SubmissionGuid = submissionGuid,
-                    FileName = filename,
-                    FilePath = filePath,
-                    ModifiedDate = DateTime.Now,
-                    ModifiedBy = UserGuid
-                });
+            int lastSlash = newFilePath.LastIndexOf('/');
+
+            if (lastSlash >= 0)
+            {
+                newFilePath = newFilePath.Substring(0, lastSlash + 1) + newFileName;
+            }
+
+            _submissionsData.UpdateSubmissionsBySubmissionGuid(new Submissions
+            {
+                SubmissionGuid = submissionGuid,
+                FileName = newFileName,
+                FilePath = newFilePath,
+                ModifiedDate = DateTime.Now,
+                ModifiedBy = UserGuid
+            });
 
             TempData["Success"] = "Assignment file updated successfully.";
 
