@@ -12938,3 +12938,25 @@ body {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+#students_table th {
+    white-space: nowrap;
+}
+
+#students_table td {
+    vertical-align: middle;
+}
+
+.submission-file {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.submission-file:hover {
+    text-decoration: underline;
+}
+
+.feedback-input {
+    min-width: 220px;
+    resize: vertical;
+}

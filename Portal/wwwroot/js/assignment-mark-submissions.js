@@ -47,7 +47,21 @@ $(document).ready(function () {
             },
             {
                 data: "fileName",
-                name: "fileName"
+                name: "fileName",
+                render: function (data, type, row) {
+
+                    if (!data) {
+                        return '<span class="text-muted fst-italic">Not submitted</span>';
+                    }
+
+                    return `
+                        <a href="/Submissions/ViewSubmissionFile?submissionGuid=${row.submissionGuid}"
+                           class="submission-file text-primary" target="_blank">
+                            <i class="fa-solid fa-download me-1"></i>
+                            ${data.split('/').pop()}
+                        </a>
+                    `;
+                }
             },
             {
                 data: "marks",
@@ -105,3 +119,44 @@ function strtrunc(str, num) {
         ? str.substring(0, num) + "..."
         : str;
 }
+
+function renderDownloadForm(format) {
+    $('#export-to-file-form').attr('action', '/Submissions/ExportTable?format=' + format);
+
+    // Get jQuery DataTables AJAX params
+    var datatableParams = $('#students_table').DataTable().ajax.params();
+
+    // Set DataTables parameters
+    $('#dtParametersJson').val(JSON.stringify(datatableParams));
+
+    // Set Assignment Guid
+    $('#exportAssignmentGuid').val($('#assignmentGuid').val());
+
+    // If the input exists, replace value, if not create the input and append to form
+    if ($("#export-to-file-form input[name=dtParametersJson]").val()) {
+        $('#export-to-file-form input[name=dtParametersJson]').val(datatableParams);
+    } else {
+        var searchModelInput = $("<input>")
+            .attr("type", "hidden")
+            .attr("name", "dtParametersJson")
+            .val(datatableParams);
+
+        $('#export-to-file-form').append(searchModelInput);
+    }
+}
+
+
+$('#btnExportList').on('click', function () {
+
+    renderDownloadForm('excel');
+
+    $('#export-to-file-form').submit();
+
+});
+
+$("#btnDownloadAll").on("click", function () {
+
+    const assignmentGuid = $("#assignmentGuid").val();
+
+    window.location.href = `/Assignments/DownloadAllSubmissions?assignmentGuid=${assignmentGuid}`;
+});

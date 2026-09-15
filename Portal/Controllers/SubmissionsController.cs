@@ -1,10 +1,12 @@
 using BusinessLayer.Models;
+using BusinessLayer.Services;
 using BusinessLayer.Services.ExportService;
 using DataAccessLayer.DataAccess;
 using DocumentFormat.OpenXml.EMMA;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Newtonsoft.Json;
 using Portal.Extensions;
 using Portal.Models;
 using Portal.Models.DatatableModels;
@@ -223,55 +225,18 @@ namespace Portal.Controllers
             {
                 string search = searchBy.Trim();
 
-                result = result.Where(r =>
-                    (r.StudentCode != null &&
-                     r.StudentCode.Contains(
-                         search,
-                         StringComparison.OrdinalIgnoreCase))
-
-                    ||
-
-                    (r.FullName != null &&
-                     r.FullName.Contains(
-                         search,
-                         StringComparison.OrdinalIgnoreCase))
-
-                    ||
-
-                    (r.FileName != null &&
-                     r.FileName.Contains(
-                         search,
-                         StringComparison.OrdinalIgnoreCase))
-
-                    || 
-                    
-                    (r.Marks != null &&
-                     r.Marks.ToString().Contains(
-                         search,
-                         StringComparison.OrdinalIgnoreCase))
-                    ||
-
-                    (r.Feedback != null &&
-                     r.Feedback.Contains(
-                         search,
-                         StringComparison.OrdinalIgnoreCase))
-                );
+                result = result.Where(r => (r.StudentCode != null &&  r.StudentCode.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                                    (r.FullName != null && r.FullName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                                    (r.FileName != null && r.FileName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                                    (r.Marks != null && r.Marks.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                                    (r.Feedback != null && r.Feedback.Contains(search, StringComparison.OrdinalIgnoreCase)));
             }
 
-            result = orderAscendingDirection
-                ? result.OrderByDynamic(
-                    orderCriteria,
-                    DtOrderDir.Asc)
-
-                : result.OrderByDynamic(
-                    orderCriteria,
-                    DtOrderDir.Desc);
+            result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
 
             int filteredResultsCount = result.Count();
 
-            int start = Math.Max(
-                dtParameters.Start,
-                0);
+            int start = Math.Max( dtParameters.Start, 0);
 
             int length = dtParameters.Length;
 
@@ -282,10 +247,7 @@ namespace Portal.Controllers
             }
 
 
-            var data = result
-                .Skip(start)
-                .Take(length)
-                .ToList();
+            var data = result.Skip(start).Take(length).ToList();
 
             return Json(new DtResult<Submissions>
             {
@@ -294,6 +256,52 @@ namespace Portal.Controllers
                 RecordsFiltered = filteredResultsCount,
                 Data = data
             });
+        }
+
+        [HttpPost("Submissions/ExportTable")]
+        public async Task<IActionResult> ExportTable([FromForm] Guid assignmentGuid, [FromForm] string dtParametersJson)
+        {
+            var dtParameters = new DtParameters();
+
+            if (!string.IsNullOrEmpty(dtParametersJson))
+            {
+                dtParameters = JsonConvert.DeserializeObject<DtParameters>(dtParametersJson);
+            }
+
+            var searchBy = dtParameters.Search?.Value;
+            var orderCriteria = "Id";
+            var orderAscendingDirection = true;
+
+            if (dtParameters.Order != null)
+            {
+                // in this example we just default sort on the 1st column
+                orderCriteria = dtParameters.Columns[dtParameters.Order[0].Column].Data;
+                orderAscendingDirection = dtParameters.Order[0].Dir.ToString().ToLower() == "asc";
+            }
+
+            var result = _submissionsData.GetAllSubmissionsByAssignmentGuid(assignmentGuid).AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchBy))
+            {
+                result = result.Where(r => r.StudentCode != null && r.StudentCode.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Feedback != null && r.Feedback.ToString().ToUpper().Contains(searchBy.ToUpper()));
+            }
+
+            result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
+
+            var resultList = result.Select(x => new SubmissionExportViewModel
+            {
+                StudentCode = x.StudentCode,
+                FullName = x.FullName,
+                Marks = x.Marks,
+                Feedback = x.Feedback
+            }).ToList();
+
+            return File(await _exportService.ExportToExcel(resultList),
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "data.xlsx"
+            );
         }
 
         public IActionResult ViewSubmissionFile(Guid submissionGuid)

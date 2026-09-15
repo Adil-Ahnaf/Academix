@@ -1,66 +1,122 @@
 ﻿@model MarkSubmissionsViewModel
+
 @{
     ViewData["Title"] = "Mark Submissions";
 }
 
 <div class="container-fluid px-4">
 
-    <h4 class="my-4">Assignment Information</h4>
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center my-4">
+        <div>
+            <h4 class="mb-1 fw-semibold">Mark Submissions</h4>
+            <p class="text-muted mb-0">
+                Review student submissions, assign marks and provide feedback.
+            </p>
+        </div>
+    </div>
+
 
     <!-- Assignment Information -->
     <div class="card shadow-sm border-1 mb-4">
+
         <div class="card-body p-4">
 
-            <div class="row align-items-center">
+            <input type="hidden" id="assignmentGuid" value="@Model.AssignmentInfo?.AssignmentGuid" />
+
+            <div class="row g-4">
 
                 <!-- Assignment Details -->
                 <div class="col-md-6">
-                    <input type="hidden" id="assignmentGuid" value="@Model.AssignmentInfo?.AssignmentGuid" />
 
-                    <p class="text-muted mb-2">
-                        <i class="fa-solid fa-file-alt text-primary me-2"></i>
-                        <strong class="text-dark">Assignment:</strong>
-                        @Model.AssignmentInfo?.Title
-                    </p>
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="text-primary me-3">
+                            <i class="fa-solid fa-file-alt fa-lg"></i>
+                        </div>
 
-                    <p class="text-muted mb-2">
-                        <i class="fa-solid fa-calendar-alt text-primary me-2"></i>
-                        <strong class="text-dark">Deadline:</strong>
-                        @Model.AssignmentInfo?.Deadline
-                    </p>
+                        <div>
+                            <small class="text-muted d-block">Assignment</small>
+                            <strong>
+                                @Model.AssignmentInfo?.Title
+                            </strong>
+                        </div>
+                    </div>
 
-                    <p class="text-muted mb-0">
-                        <i class="fa-solid fa-star text-primary me-2"></i>
-                        <strong class="text-dark">Total Marks:</strong>
-                        @Model.AssignmentInfo?.Marks
-                    </p>
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="text-primary me-3">
+                            <i class="fa-solid fa-calendar-alt fa-lg"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted d-block">Deadline</small>
+                            <strong>
+                                @Model.AssignmentInfo?.Deadline
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start">
+                        <div class="text-primary me-3">
+                            <i class="fa-solid fa-star fa-lg"></i>
+                        </div>
+
+                        <div>
+                            <small class="text-muted d-block">Total Marks</small>
+                            <strong>
+                                @Model.AssignmentInfo?.Marks
+                            </strong>
+                        </div>
+                    </div>
+
                 </div>
 
-                <!-- Class Information -->
+
+                <!-- Class Details -->
                 <div class="col-md-6 border-start">
+
                     <div class="ps-md-4">
 
-                        <input type="hidden" id="classGuid" value="" />
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="text-primary me-3">
+                                <i class="fa-solid fa-chalkboard fa-lg"></i>
+                            </div>
 
-                        <p class="text-muted mb-2">
-                            <i class="fa-solid fa-chalkboard text-primary me-2"></i>
-                            <strong class="text-dark">Class Name:</strong>
-                            @Model.ClassInfo?.ClassName
-                        </p>
+                            <div>
+                                <small class="text-muted d-block">Class</small>
+                                <strong>
+                                    @Model.ClassInfo?.ClassName
+                                </strong>
+                            </div>
+                        </div>
 
-                        <p class="text-muted mb-2">
-                            <i class="fa-solid fa-book text-primary me-2"></i>
-                            <strong class="text-dark">Subject:</strong>
-                            @Model.ClassInfo?.SubjectName
-                        </p>
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="text-primary me-3">
+                                <i class="fa-solid fa-book fa-lg"></i>
+                            </div>
 
-                        <p class="text-muted mb-0">
-                            <i class="fa-solid fa-layer-group text-primary me-2"></i>
-                            <strong class="text-dark">Section:</strong>
-                            @Model.ClassInfo?.Section
-                        </p>
+                            <div>
+                                <small class="text-muted d-block">Subject</small>
+                                <strong>
+                                    @Model.ClassInfo?.SubjectName
+                                </strong>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start">
+                            <div class="text-primary me-3">
+                                <i class="fa-solid fa-layer-group fa-lg"></i>
+                            </div>
+
+                            <div>
+                                <small class="text-muted d-block">Section</small>
+                                <strong>
+                                    @Model.ClassInfo?.Section
+                                </strong>
+                            </div>
+                        </div>
 
                     </div>
+
                 </div>
 
             </div>
@@ -68,41 +124,112 @@
         </div>
     </div>
 
-    <!-- Enrolled Student List -->
-    <div class="card my-4">
-        <div class="card-header fs-5 fw-semibold">
-            <i class="fas fa-table me-1"></i>
-            Students List
+
+    <!-- Students List -->
+    <div class="card shadow-sm border-1 my-5 py-3">
+
+        <!-- Table Header -->
+        <div class="card-header bg-white border-bottom py-3">
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+
+                <!-- Title -->
+                <div>
+                    <h5 class="mb-1 fw-semibold">
+                        <i class="fa-solid fa-users text-primary me-2"></i>
+                        Students List
+                    </h5>
+
+                    <small class="text-muted">
+                        Review submissions and assign marks.
+                    </small>
+                </div>
+
+
+                <!-- Actions -->
+                <div class="d-flex flex-wrap gap-2">
+
+                    <!-- Edit / Save All -->
+                    <button type="button" id="btnEditAll" class="btn btn-sm btn-outline-primary">
+
+                        <i class="fa-solid fa-pen me-1"></i>
+                        <span>Edit All</span>
+
+                    </button>
+
+
+                    <!-- Download All -->
+                    <button type="button" id="btnDownloadAll" class="btn btn-sm btn-outline-secondary">
+
+                        <i class="fa-solid fa-download me-1"></i>
+                        Download All Files
+
+                    </button>
+
+
+                    <!-- Export -->
+                    <button type="button" id="btnExportList" class="btn btn-sm btn-outline-success">
+
+                        <i class="fa-solid fa-file-export me-1"></i>
+                        Export List
+
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
+
+        <form id="export-to-file-form" method="POST" enctype="application/x-www-form-urlencoded">
+            <input type="hidden" name="assignmentGuid" id="exportAssignmentGuid" value="@Model.AssignmentInfo?.AssignmentGuid" />
+
+            <input type="hidden" name="dtParametersJson" id="dtParametersJson" />
+        </form>
+
+        <!-- Table -->
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-12">
-                    <table id="students_table" class="table table-striped table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Student ID</th>
-                                <th>Full Name</th>
-                                <th>Submitted File</th>
-                                <th>Marks</th>
-                                <th>Feedback</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
+
+            <div class="table-responsive">
+
+                <table id="students_table" class="table table-hover table-bordered align-middle w-100">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Full Name</th>
+                            <th>Submitted File</th>
+                            <th style="width:120px;">Marks</th>
+                            <th style="min-width:250px;">Feedback</th>
+                            <th style="width:100px;">Action</th>
+                        </tr>
+
+                    </thead>
+
+                </table>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
+
 @section Styles {
+
     <link rel="stylesheet" href="~/lib/datatables/css/dataTables.bootstrap5.css" asp-append-version="true" />
 }
 
 @section Scripts {
+
     <script src="~/lib/datatables/js/jquery.dataTables.js" asp-append-version="true"></script>
+
     <script src="~/lib/datatables/js/dataTables.bootstrap5.js" asp-append-version="true"></script>
 
     <script src="~/lib/datatables-buttons/dataTables.buttons.min.js" asp-append-version="true"></script>
+
     <script src="~/js/assignment-mark-submissions.js" asp-append-version="true"></script>
 }
