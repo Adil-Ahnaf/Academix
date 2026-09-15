@@ -158,5 +158,5 @@ $("#btnDownloadAll").on("click", function () {
 
     const assignmentGuid = $("#assignmentGuid").val();
 
-    window.location.href = `/Assignments/DownloadAllSubmissions?assignmentGuid=${assignmentGuid}`;
+    window.location.href = `/Submissions/DownloadAllSubmissions?assignmentGuid=${assignmentGuid}`;
 });

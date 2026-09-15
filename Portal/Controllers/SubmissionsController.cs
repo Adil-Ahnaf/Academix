@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using Portal.Extensions;
 using Portal.Models;
 using Portal.Models.DatatableModels;
+using System.IO.Compression;
 
 namespace Portal.Controllers
 {
@@ -225,7 +226,7 @@ namespace Portal.Controllers
             {
                 string search = searchBy.Trim();
 
-                result = result.Where(r => (r.StudentCode != null &&  r.StudentCode.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                result = result.Where(r => (r.StudentCode != null && r.StudentCode.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
                                     (r.FullName != null && r.FullName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
                                     (r.FileName != null && r.FileName.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
                                     (r.Marks != null && r.Marks.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)) ||
@@ -236,7 +237,7 @@ namespace Portal.Controllers
 
             int filteredResultsCount = result.Count();
 
-            int start = Math.Max( dtParameters.Start, 0);
+            int start = Math.Max(dtParameters.Start, 0);
 
             int length = dtParameters.Length;
 
@@ -332,6 +333,63 @@ namespace Portal.Controllers
             Response.Headers.Append("Content-Disposition", $"inline; filename=\"{fileName}\"");
 
             return PhysicalFile(filePath, contentType);
+        }
+
+        [HttpGet]
+        public IActionResult DownloadAllSubmissions(Guid assignmentGuid)
+        {
+            var assignment = _assignmentsData.GetAssignmentByAssignmentGuid(assignmentGuid);
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            var submissions = _submissionsData.GetAllSubmissionsByAssignmentGuid(assignmentGuid)
+                .Where(x => !string.IsNullOrEmpty(x.FilePath))
+                .ToList();
+
+            if (!submissions.Any())
+            {
+                return NotFound("No submitted files found.");
+            }
+
+            using var memoryStream = new MemoryStream();
+
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+            {
+                foreach (var submission in submissions)
+                {
+                    string filePath = Path.Combine(
+                        _hostingEnvironment.WebRootPath,
+                        submission.FilePath.TrimStart('~', '/').Replace("/", Path.DirectorySeparatorChar.ToString())
+                    );
+
+                    if (!System.IO.File.Exists(filePath))
+                    {
+                        continue;
+                    }
+
+                    string fileName = Path.GetFileName(filePath);
+
+                    var zipEntry = archive.CreateEntry(
+                        fileName,
+                        CompressionLevel.Fastest);
+
+                    using var entryStream = zipEntry.Open();
+                    using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+
+                    fileStream.CopyTo(entryStream);
+                }
+            }
+
+            memoryStream.Position = 0;
+
+            string assignmentTitle = assignment.Title.Replace(" ", "_").Replace("/", "_").Replace("\\", "_");
+
+            string zipFileName = $"{assignmentTitle}_Submissions.zip";
+
+            return File(memoryStream.ToArray(), "application/zip", zipFileName);
         }
     }
 }
