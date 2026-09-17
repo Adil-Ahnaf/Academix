@@ -183,7 +183,6 @@
 
         <form id="export-to-file-form" method="POST" enctype="application/x-www-form-urlencoded">
             <input type="hidden" name="assignmentGuid" id="exportAssignmentGuid" value="@Model.AssignmentInfo?.AssignmentGuid" />
-
             <input type="hidden" name="dtParametersJson" id="dtParametersJson" />
         </form>
 
@@ -200,7 +199,7 @@
                             <th>Student ID</th>
                             <th>Full Name</th>
                             <th>Submitted File</th>
-                            <th style="width:120px;">Marks</th>
+                            <th style="width:120px;">Marks <span class="text-muted small">(out of @Model.AssignmentInfo?.Marks)</span></th>
                             <th style="min-width:250px;">Feedback</th>
                             <th style="width:100px;">Action</th>
                         </tr>

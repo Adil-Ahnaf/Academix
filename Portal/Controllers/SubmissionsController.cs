@@ -237,18 +237,7 @@ namespace Portal.Controllers
 
             int filteredResultsCount = result.Count();
 
-            int start = Math.Max(dtParameters.Start, 0);
-
-            int length = dtParameters.Length;
-
-
-            if (length <= 0)
-            {
-                length = 10;
-            }
-
-
-            var data = result.Skip(start).Take(length).ToList();
+            var data = result.ToList();
 
             return Json(new DtResult<Submissions>
             {
@@ -390,6 +379,37 @@ namespace Portal.Controllers
             string zipFileName = $"{assignmentTitle}_Submissions.zip";
 
             return File(memoryStream.ToArray(), "application/zip", zipFileName);
+        }
+
+        [HttpPost]
+        public IActionResult SaveAllMarks([FromBody] List<SubmissionsViewModel> submissions)
+        {
+            if (submissions == null || !submissions.Any())
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "No submissions received."
+                });
+            }
+
+            foreach (var submission in submissions)
+            {
+                _submissionsData.SaveSubmissionMarkBySubmissionGuid(new Submissions
+                {
+                    SubmissionGuid = submission.SubmissionGuid,
+                    Marks = submission.Marks,
+                    Feedback = submission.Feedback,
+                    ModifiedDate = DateTime.Now,
+                    ModifiedBy = UserGuid
+                });
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = "All submissions have been saved successfully."
+            });
         }
     }
 }

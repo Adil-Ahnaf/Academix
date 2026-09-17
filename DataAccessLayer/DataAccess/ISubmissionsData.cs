@@ -13,5 +13,6 @@ namespace DataAccessLayer.DataAccess
 		Submissions GetSubmissionBySubmissionGuid(Guid submissionGuid);
 		void UpdateSubmissionsBySubmissionGuid(Submissions submissions);
         List<Submissions> GetAllSubmissionsByAssignmentGuid(Guid assignmentGuid);
+		void SaveSubmissionMarkBySubmissionGuid(Submissions submissions);
     }
 }

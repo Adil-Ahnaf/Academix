@@ -1,4 +1,6 @@
 ﻿var table;
+var editMode = false;
+var editedSubmissions = {};
 
 $(document).ready(function () {
 
@@ -10,7 +12,8 @@ $(document).ready(function () {
         processing: true,
         serverSide: true,
 
-        paging: true,
+        // Disable pagination
+        paging: false,
 
         dom: "Bfrtip",
 
@@ -56,7 +59,8 @@ $(document).ready(function () {
 
                     return `
                         <a href="/Submissions/ViewSubmissionFile?submissionGuid=${row.submissionGuid}"
-                           class="submission-file text-primary" target="_blank">
+                           class="submission-file text-primary"
+                           target="_blank">
                             <i class="fa-solid fa-download me-1"></i>
                             ${data.split('/').pop()}
                         </a>
@@ -65,11 +69,30 @@ $(document).ready(function () {
             },
             {
                 data: "marks",
-                name: "marks"
+                name: "marks",
+                render: function (data, type, row) {
+
+                    return `
+                        <input type="number"
+                               class="form-control form-control-sm marks-input"
+                               value="${data ?? ''}"
+                               min="0"
+                               max="${row.totalMarks}"
+                               disabled />
+                    `;
+                }
             },
             {
                 data: "feedback",
-                name: "feedback"
+                name: "feedback",
+                render: function (data, type, row) {
+
+                    return `
+                        <textarea class="form-control form-control-sm feedback-input"
+                                  rows="1"
+                                  disabled>${data ?? ''}</textarea>
+                    `;
+                }
             },
             {
                 data: null,
@@ -77,6 +100,7 @@ $(document).ready(function () {
                 orderable: false,
                 searchable: false,
                 render: function (data, type, row) {
+
                     return `
                         <a class="btn btn-sm btn-primary"
                            href="#">
@@ -98,6 +122,7 @@ $(document).ready(function () {
             {
                 targets: "trim",
                 render: function (data, type) {
+
                     if (type === "display" && data) {
                         return strtrunc(data, 10);
                     }
@@ -109,6 +134,7 @@ $(document).ready(function () {
     });
 });
 
+
 function strtrunc(str, num) {
 
     if (!str) {
@@ -119,6 +145,7 @@ function strtrunc(str, num) {
         ? str.substring(0, num) + "..."
         : str;
 }
+
 
 function renderDownloadForm(format) {
     $('#export-to-file-form').attr('action', '/Submissions/ExportTable?format=' + format);
@@ -145,18 +172,104 @@ function renderDownloadForm(format) {
     }
 }
 
-
 $('#btnExportList').on('click', function () {
-
     renderDownloadForm('excel');
-
     $('#export-to-file-form').submit();
-
 });
+
 
 $("#btnDownloadAll").on("click", function () {
-
     const assignmentGuid = $("#assignmentGuid").val();
-
     window.location.href = `/Submissions/DownloadAllSubmissions?assignmentGuid=${assignmentGuid}`;
 });
+
+// Store edited marks / feedback
+$(document).on("input", ".marks-input, .feedback-input", function () {
+
+    var node = $(this).closest("tr");
+
+    var row = table.row(node).data();
+
+    if (!row) {
+        return;
+    }
+
+    var marks = $(node).find(".marks-input").val();
+    var feedback = $(node).find(".feedback-input").val();
+
+    editedSubmissions[row.submissionGuid] = {
+
+        submissionGuid: row.submissionGuid,
+
+        marks: marks === ""
+            ? null
+            : parseFloat(marks),
+
+        feedback: feedback
+    };
+});
+
+
+// Edit All / Save All
+$("#btnEditAll").on("click", function () {
+
+    editMode = !editMode;
+
+    if (editMode) {
+
+        $(this).removeClass("btn-outline-primary").addClass("btn-primary");
+
+        $(this).find("i").removeClass("fa-pen").addClass("fa-save");
+
+        $(this).find("span").text("Save All");
+
+        $("#students_table tbody").find(".marks-input, .feedback-input").prop("disabled", false);
+    }
+    else {
+
+        saveAllSubmissions();
+
+        $(this).removeClass("btn-primary").addClass("btn-outline-primary");
+
+        $(this).find("i").removeClass("fa-save").addClass("fa-pen");
+
+        $(this).find("span").text("Edit All");
+
+        $("#students_table tbody").find(".marks-input, .feedback-input").prop("disabled", true);
+    }
+});
+
+
+// Save All
+function saveAllSubmissions() {
+
+    var submissions = Object.values(editedSubmissions);
+
+    if (submissions.length === 0) {
+
+        alert("No changes to save.");
+        return;
+    }
+
+    $.ajax({
+        url: "/Submissions/SaveAllMarks",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(submissions),
+
+        success: function (response) {
+
+            if (response.success) {
+                alert(response.message);
+                editedSubmissions = {};
+            }
+            else {
+                alert(response.message);
+            }
+        },
+
+        error: function (xhr) {
+            alert("Something went wrong while saving.");
+        }
+    });
+}
