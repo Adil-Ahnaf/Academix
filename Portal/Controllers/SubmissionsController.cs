@@ -274,8 +274,7 @@ namespace Portal.Controllers
             if (!string.IsNullOrEmpty(searchBy))
             {
                 result = result.Where(r => r.StudentCode != null && r.StudentCode.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Feedback != null && r.Feedback.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                        r.FullName != null && r.FullName.ToString().ToUpper().Contains(searchBy.ToUpper()));
             }
 
             result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
@@ -284,6 +283,7 @@ namespace Portal.Controllers
             {
                 StudentCode = x.StudentCode,
                 FullName = x.FullName,
+                FileName = x.FileName,
                 Marks = x.Marks,
                 Feedback = x.Feedback
             }).ToList();
@@ -389,6 +389,16 @@ namespace Portal.Controllers
                 return Json(new
                 {
                     success = false,
+                    message = "No submissions received."
+                });
+            }
+
+            // validate single submission marks and feedback
+            if (submissions.Count() == 1 && (submissions[0].Marks == null && string.IsNullOrEmpty(submissions[0].Feedback)))
+            {
+                return Json(new
+                {
+                    success = true,
                     message = "No submissions received."
                 });
             }

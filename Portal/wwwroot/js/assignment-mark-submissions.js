@@ -102,10 +102,12 @@ $(document).ready(function () {
                 render: function (data, type, row) {
 
                     return `
-                        <a class="btn btn-sm btn-primary"
-                           href="#">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary btn-edit-row">
+                            <i class="fa-solid fa-pen me-1"></i>
                             Edit
-                        </a>`;
+                        </button>
+                    `;
                 }
             }
         ],
@@ -239,6 +241,43 @@ $("#btnEditAll").on("click", function () {
     }
 });
 
+// Row Edit
+$(document).on("click", ".btn-edit-row", function () {
+
+    var button = $(this);
+    var rowNode = button.closest("tr");
+    var row = table.row(rowNode).data();
+
+    if (!row) {
+        return;
+    }
+
+    var marksInput = rowNode.find(".marks-input");
+    var feedbackInput = rowNode.find(".feedback-input");
+
+    // Start editing
+    if (!button.hasClass("editing")) {
+
+        // Store original values in the row
+        rowNode.data("original-marks", marksInput.val());
+        rowNode.data("original-feedback", feedbackInput.val());
+
+        // Enable fields
+        marksInput.prop("disabled", false);
+        feedbackInput.prop("disabled", false);
+
+        // Change button appearance
+        button
+            .addClass("editing btn-warning")
+            .removeClass("btn-outline-primary")
+            .html('<i class="fa-solid fa-save me-1"></i> Save');
+        return;
+    }
+
+    // Save row
+    saveSingleSubmission(rowNode, row);
+});
+
 
 // Save All
 function saveAllSubmissions() {
@@ -269,6 +308,85 @@ function saveAllSubmissions() {
         },
 
         error: function (xhr) {
+            alert("Something went wrong while saving.");
+        }
+    });
+}
+
+
+function saveSingleSubmission(rowNode, row) {
+
+    var marksInput = rowNode.find(".marks-input");
+    var feedbackInput = rowNode.find(".feedback-input");
+
+    var marksValue = marksInput.val();
+    var feedbackValue = feedbackInput.val();
+
+    var submission = { submissionGuid: row.submissionGuid,
+
+        marks: marksValue === ""
+            ? null
+            : parseFloat(marksValue),
+
+        feedback: feedbackValue
+    };
+
+    $.ajax({
+        url: "/Submissions/SaveAllMarks",
+        type: "POST",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify([submission]),
+
+        beforeSend: function () {
+
+            rowNode.find(".btn-edit-row")
+                .prop("disabled", true)
+                .html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...');
+        },
+
+        success: function (response) {
+
+            if (response.success) {
+
+                // Update DataTables row data
+                row.marks = submission.marks;
+                row.feedback = submission.feedback;
+
+                table.row(rowNode).data(row).invalidate();
+
+                // Remove from unsaved changes
+                delete editedSubmissions[row.submissionGuid];
+
+                // Disable inputs again
+                rowNode.find(".marks-input, .feedback-input")
+                    .prop("disabled", true);
+
+                // Reset button
+                rowNode.find(".btn-edit-row")
+                    .removeClass("editing btn-primary")
+                    .addClass("btn-outline-primary")
+                    .prop("disabled", false)
+                    .html('<i class="fa-solid fa-pen me-1"></i> Edit');
+
+                // Optional success message
+                alert(response.message);
+            }
+            else {
+
+                rowNode.find(".btn-edit-row")
+                    .prop("disabled", false)
+                    .html('<i class="fa-solid fa-save me-1"></i> Save');
+
+                alert(response.message);
+            }
+        },
+
+        error: function (xhr) {
+
+            rowNode.find(".btn-edit-row")
+                .prop("disabled", false)
+                .html('<i class="fa-solid fa-save me-1"></i> Save');
+
             alert("Something went wrong while saving.");
         }
     });
