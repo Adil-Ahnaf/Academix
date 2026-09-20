@@ -421,5 +421,22 @@ namespace Portal.Controllers
                 message = "All submissions have been saved successfully."
             });
         }
+
+        public IActionResult GetAssignmentMark(Guid assignmentGuid)
+        {
+            var assignment = _submissionsData.GetAStudentAssignmentMark(assignmentGuid, UserGuid);
+
+            if (assignment == null)
+            {
+                return NotFound();
+            }
+
+            return Json(new
+            {
+                success = true,
+                mark = assignment.Marks,
+                feedback = assignment.Feedback
+            });
+        }
     }
 }

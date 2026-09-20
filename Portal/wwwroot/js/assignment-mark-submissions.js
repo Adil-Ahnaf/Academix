@@ -101,6 +101,18 @@ $(document).ready(function () {
                 searchable: false,
                 render: function (data, type, row) {
 
+                    if (!row.fileName) {
+                        return `
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary btn-edit-row"
+                                    disabled
+                                    title="Student has not submitted an assignment">
+                                <i class="fa-solid fa-pen me-1"></i>
+                                Edit
+                            </button>
+                        `;
+                    }
+
                     return `
                         <button type="button"
                                 class="btn btn-sm btn-outline-primary btn-edit-row">
@@ -225,7 +237,22 @@ $("#btnEditAll").on("click", function () {
 
         $(this).find("span").text("Save All");
 
-        $("#students_table tbody").find(".marks-input, .feedback-input").prop("disabled", false);
+        // Enable rows where the student has submitted an assignment
+        $("#students_table tbody tr").each(function () {
+
+            var rowNode = $(this);
+            var row = table.row(rowNode).data();
+
+            if (!row) {
+                return;
+            }
+
+            // Only submitted students can be edited
+            if (row.fileName) {
+                rowNode.find(".marks-input, .feedback-input").prop("disabled", false);
+                rowNode.find(".btn-edit-row").prop("disabled", true);
+            }
+        });
     }
     else {
 
@@ -237,7 +264,23 @@ $("#btnEditAll").on("click", function () {
 
         $(this).find("span").text("Edit All");
 
+        // Disable all inputs again
         $("#students_table tbody").find(".marks-input, .feedback-input").prop("disabled", true);
+
+        // Re-enable Edit buttons only for submitted rows
+        $("#students_table tbody tr").each(function () {
+
+            var rowNode = $(this);
+            var row = table.row(rowNode).data();
+
+            if (!row) {
+                return;
+            }
+
+            if (row.fileName) {
+                rowNode.find(".btn-edit-row").prop("disabled", false);
+            }
+        });
     }
 });
 

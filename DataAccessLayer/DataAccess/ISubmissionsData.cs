@@ -14,5 +14,6 @@ namespace DataAccessLayer.DataAccess
 		void UpdateSubmissionsBySubmissionGuid(Submissions submissions);
         List<Submissions> GetAllSubmissionsByAssignmentGuid(Guid assignmentGuid);
 		void SaveSubmissionMarkBySubmissionGuid(Submissions submissions);
+		Submissions GetAStudentAssignmentMark(Guid assignmentGuid, string aspNetUserId);
     }
 }

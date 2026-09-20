@@ -62,5 +62,10 @@ namespace DataAccessLayer.DataAccess
 		{
             _dataAccess.Execute(SpConstants.SaveSubmissionMarkBySubmissionGuid, new { submissions.Marks, submissions.Feedback, submissions.SubmissionGuid, submissions.ModifiedDate, submissions.ModifiedBy });
         }
+
+        public Submissions GetAStudentAssignmentMark(Guid assignmentGuid, string aspNetUserId)
+        {
+            return _dataAccess.GetSingle<Submissions>(SpConstants.GetAStudentAssignmentMark, new { assignmentGuid, aspNetUserId });
+        }
     }
 }

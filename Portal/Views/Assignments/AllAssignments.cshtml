@@ -173,6 +173,70 @@ else
             </div>
         </div>
     </div>
+
+    <!-- Assignment Mark Modal -->
+    <!-- View Assignment Mark Modal -->
+    <div class="modal fade" id="assignmentMarkModal" tabindex="-1"
+         aria-labelledby="assignmentMarkModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignmentMarkModalLabel">
+                        <i class="fa-solid fa-square-check text-success me-2"></i>
+                        Assignment Result
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Result -->
+                    <div id="assignmentMarkContent" class="d-none">
+
+                        <div class="text-center mb-4">
+                            <small class="text-muted d-block">
+                                Your Mark
+                            </small>
+
+                            <div class="mt-1">
+                                <span id="assignmentMark"
+                                      class="fs-1 fw-bold text-primary">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="border rounded-3 p-3 bg-light">
+
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa-solid fa-comment-dots text-primary me-2"></i>
+
+                                <span class="fw-semibold">
+                                    Teacher Feedback
+                                </span>
+                            </div>
+
+                            <div id="teacherFeedback"
+                                 class="text-muted">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 }
 
 <div class="container-fluid px-4">
@@ -592,7 +656,7 @@ else
                                                             data-file-path="@submission.FilePath"
                                                             data-file-name="@System.IO.Path.GetFileName(submission.FilePath)"
                                                             data-view-url="@Url.Action("ViewSubmissionFile", "Submissions",
-                                                                                                                                                                                                 new { submissionGuid = submission.SubmissionGuid })">
+                                                                                                                                                                                                                                                         new { submissionGuid = submission.SubmissionGuid })">
                                                         <i class="fa-solid fa-upload me-1"></i>
                                                         Update
                                                     </button>
@@ -613,11 +677,12 @@ else
                                                 if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
                                                 {
                                                     <!-- View Assignment Mark -->
-                                                    <a asp-controller="Assignments" asp-action="ViewAssignmentMarks" asp-route-assignmentGuid="@item.AssignmentGuid"
-                                                       class="btn btn-info">
+                                                    <button type="button" class="btn btn-info view-assignment-mark"
+                                                            data-bs-toggle="modal" data-bs-target="#assignmentMarkModal"
+                                                            data-assignment-guid="@item.AssignmentGuid">
                                                         <i class="fa-solid fa-eye me-1"></i>
                                                         View Assignment Mark
-                                                    </a>
+                                                    </button>
                                                 }
                                                 else
                                                 {
@@ -682,7 +747,7 @@ else
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        $(document).on("click", ".delete-btn", function () {
+        $(document).on("click", ".delete-btn", function() {
 
             var id = $(this).data("id");
             var title = $(this).data("title");
@@ -692,14 +757,14 @@ else
 
         });
 
-        $(document).on('click', '.submit-assignment', function () {
+        $(document).on('click', '.submit-assignment', function() {
 
             var assignmentGuid = $(this).data('assignment-guid');
 
             $('#assignmentGuid').val(assignmentGuid);
         });
 
-        $(document).on("click", ".submit-assignment", function () {
+        $(document).on("click", ".submit-assignment", function() {
 
             var submissionGuid = $(this).data("submission-guid");
             var fileName = $(this).data("file-name");
@@ -710,11 +775,35 @@ else
             $("#currentSubmissionFile").text(fileName).attr("href", viewUrl);
         });
 
-        setTimeout(function () {
+        setTimeout(function() {
             var alert = document.querySelector('.alert');
             if (alert) {
                 bootstrap.Alert.getOrCreateInstance(alert).close();
             }
         }, 3000);
+
+        // Handle the click event for viewing assignment marks
+        $(document).on("click", ".view-assignment-mark", function() {
+            var assignmentGuid = $(this).data("assignment-guid");
+            // Make an AJAX request to fetch the assignment mark and feedback
+            $.ajax({
+                url: '@Url.Action("GetAssignmentMark", "Submissions")',
+                type: 'GET',
+                data: { assignmentGuid: assignmentGuid },
+                success: function(response) {
+                    if (response.success && response.mark !== null) {
+                        $("#assignmentMark").text(response.mark);
+                        $("#teacherFeedback").text(response.feedback);
+                        $("#assignmentMarkContent").removeClass("d-none");
+                    } else {
+                        $("#assignmentMark").text("Marks not available yet.");
+                        $("#assignmentMarkContent").removeClass("d-none");
+                    }
+                },
+                error: function() {
+                    alert("An error occurred while fetching the assignment mark.");
+                }
+            });
+        });
     </script>
 }
