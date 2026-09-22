@@ -28,5 +28,7 @@ namespace BusinessLayer.Models
 		[Display(Name = "Is Active")]
 		public bool IsActive { get; set; }
 		public int TotalSubmissions { get; set; }
+        public string? ClassName { get; set; }
+        public string? Section { get; set; }
     }
 }

@@ -15,7 +15,7 @@ BEGIN
 	FROM [dbo].[Assignments]  AS A
 	INNER JOIN [dbo].[StudentEnrollments] AS SE ON SE.ClassId = A.ClassId
 	INNER JOIN [dbo].[Students] AS S ON S.Id = SE.Id
-	LEFT JOIN [dbo].[Submissions] AS SU ON SU.StudentId = S.Id
+	LEFT JOIN [dbo].[Submissions] AS SU ON SU.StudentId = S.Id AND SU.AssignmentId = A.Id
 	WHERE A.AssignmentGuid = @AssignmentGuid;
 
 END

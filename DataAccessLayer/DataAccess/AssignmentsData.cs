@@ -47,5 +47,10 @@ namespace DataAccessLayer.DataAccess
         {
             return _dataAccess.GetList<Assignments>(SpConstants.GetAllAssignmentByClassGuid, new { classGuid });
         }
+
+        public List<Assignments> GetAllAssignmentsInfo()
+        {
+            return _dataAccess.GetList<Assignments>(SpConstants.GetAllAssignmentsInfo);
+        }	
     }
 }

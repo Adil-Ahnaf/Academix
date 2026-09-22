@@ -322,19 +322,16 @@ namespace Portal.Controllers
                 orderAscendingDirection = dtParameters.Order[0].Dir.ToString().ToLower() == "asc";
             }
 
-            var result = _assignmentsData.GetAllAssignments().AsQueryable();
+            var result = _assignmentsData.GetAllAssignmentsInfo().AsQueryable();
             var totalResultsCount = result.Count();
             if (!string.IsNullOrEmpty(searchBy))
             {
-                result = result.Where(r => r.ClassId != null && r.ClassId.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                result = result.Where(r => r.ClassName != null && r.ClassName.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
+                        r.Section != null && r.Section.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
                         r.Title != null && r.Title.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Description != null && r.Description.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
                         r.Marks != null && r.Marks.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.Deadline != null && r.Deadline.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.IsPublish != null && r.IsPublish.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.AssignmentGuid != null && r.AssignmentGuid.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.ModifiedDate != null && r.ModifiedDate.ToString().ToUpper().Contains(searchBy.ToUpper()) ||
-                        r.IsActive != null && r.IsActive.ToString().ToUpper().Contains(searchBy.ToUpper()));
+                        r.Deadline != null && r.Deadline.ToString().ToUpper().Contains(searchBy.ToUpper())
+                );
             }
 
             result = orderAscendingDirection ? result.OrderByDynamic(orderCriteria, DtOrderDir.Asc) : result.OrderByDynamic(orderCriteria, DtOrderDir.Desc);
@@ -348,10 +345,7 @@ namespace Portal.Controllers
                 Draw = dtParameters.Draw,
                 RecordsTotal = totalResultsCount,
                 RecordsFiltered = filteredResultsCount,
-                Data = result
-                    .Skip(dtParameters.Start)
-                    .Take(dtParameters.Length)
-                    .ToList()
+                Data = result.Skip(dtParameters.Start).Take(dtParameters.Length).ToList()
             });
         }
 

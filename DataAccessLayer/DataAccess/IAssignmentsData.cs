@@ -11,6 +11,7 @@ namespace DataAccessLayer.DataAccess
 		void DeleteAssignmentsById(long id);
 		void UpdateAssignmentsById(Assignments assignments);
 		List<Assignments> GetAllAssignmentByClassGuid(Guid classGuid);
+		List<Assignments> GetAllAssignmentsInfo();
 
     }
 }
