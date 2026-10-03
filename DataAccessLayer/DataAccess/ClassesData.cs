@@ -1,0 +1,76 @@
+using BusinessLayer.Models;
+using DataAccessLayer.SqlDb;
+
+namespace DataAccessLayer.DataAccess
+{
+	public class ClassesData : IClassesData
+	{
+		private readonly IDataAccess _dataAccess;
+
+		public ClassesData(IDataAccess dataAccess, DbConnectionInfo dbConnectionString)
+		{
+			_dataAccess = dataAccess;
+			_dataAccess.ConnectionKey = dbConnectionString.Key;
+		}
+
+		public long InsertClasses(Classes classes)
+		{
+			return _dataAccess.ExecuteScalar<long>(SpConstants.InsertClasses, new{ classes.ClassName, classes.SubjectId, classes.Section, classes.AcademicYear, classes.MaxCapacity, classes.ClassGuid, classes.CreatedDate, classes.CreatedBy, classes.IsActive });
+		}
+
+		public List<Classes> GetAllClasses()
+		{
+			return _dataAccess.GetList<Classes>(SpConstants.GetAllClasses);
+		}
+
+        public Classes GetClassesById(long id)
+        {
+            return _dataAccess.GetSingle<Classes>(SpConstants.GetClassesById, new { id });
+        }
+
+        public Classes GetClassesByClassGuid(Guid classGuid)
+		{
+			return _dataAccess.GetSingle<Classes>(SpConstants.GetClassesByClassGuid, new{ classGuid });
+		}
+
+		public void DeleteClassesById(long id)
+		{
+			_dataAccess.Execute(SpConstants.DeleteClassesById, new{ id });
+		}
+
+		public void UpdateClassesById(Classes classes)
+		{
+			_dataAccess.Execute(SpConstants.UpdateClassesById, new{ classes.Id, classes.ClassName, classes.SubjectId, classes.Section, classes.AcademicYear, classes.MaxCapacity, classes.ClassGuid, classes.ModifiedDate, classes.ModifiedBy, classes.IsActive });
+		}
+
+        public List<Classes> GetAllActiveClasses()
+		{
+            return _dataAccess.GetList<Classes>(SpConstants.GetAllActiveClasses);
+        }
+
+        public List<Classes> GetAllAvailableClassesForATeacher()
+        {
+            return _dataAccess.GetList<Classes>(SpConstants.GetAllAvailableClassesForATeacher);
+        }
+
+        public List<Classes> GetAllAvailableClassesForAStudent(Guid studentGuid)
+        {
+            return _dataAccess.GetList<Classes>(SpConstants.GetAllAvailableClassesForAStudent, new { studentGuid });
+        }
+		
+        public Classes GetStudentEnrollClassDetailsByEnrollmentId(long enrollmentId)
+        {
+            return _dataAccess.GetSingle<Classes>(SpConstants.GetStudentEnrollClassDetailsByEnrollmentId, new { enrollmentId });
+        }
+
+		public List<Classes> GetEnrolledClassesByTeacherGuid(Guid teacherGuid)
+		{
+			return _dataAccess.GetList<Classes>(SpConstants.GetEnrolledClassesByTeacherGuid, new { teacherGuid });
+		}
+
+        public List<Classes> GetEnrolledClassesByStudentGuid(Guid studentGuid)
+        {
+            return _dataAccess.GetList<Classes>(SpConstants.GetEnrolledClassesByStudentGuid, new { studentGuid });
+        }
+    }
+}

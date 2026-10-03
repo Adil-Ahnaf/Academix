@@ -1,0 +1,15 @@
+USE [AcademixDB]
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE OR ALTER PROCEDURE [dbo].[usp_GetTeacherByAspNetUserId] 
+	@AspNetUserId NVARCHAR(450)
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+    SELECT * FROM [dbo].[Teachers] WHERE AspNetUserId = @AspNetUserId;
+END
+GO

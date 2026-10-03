@@ -1,0 +1,20 @@
+using BusinessLayer.Models;
+
+namespace DataAccessLayer.DataAccess
+{
+	public interface IClassesData
+	{
+		long InsertClasses(Classes classes);
+		List<Classes> GetAllClasses();
+		Classes GetClassesById(long id);
+		Classes GetClassesByClassGuid(Guid classGuid);
+		void DeleteClassesById(long id);
+		void UpdateClassesById(Classes classes);
+		List<Classes> GetAllActiveClasses();
+		List<Classes> GetAllAvailableClassesForATeacher();
+		List<Classes> GetAllAvailableClassesForAStudent(Guid studentGuid);
+		Classes GetStudentEnrollClassDetailsByEnrollmentId(long enrollmentId);
+		List<Classes> GetEnrolledClassesByTeacherGuid(Guid teacherGuid);
+		List<Classes> GetEnrolledClassesByStudentGuid(Guid studentGuid);
+    }
+}

@@ -1,0 +1,809 @@
+﻿@model AssignmentsViewModel
+@{
+    ViewData["Title"] = "Assignments";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+@if (User.IsInRole("Teacher"))
+{
+    <!-- =========================================================
+         DELETE MODAL
+    ========================================================== -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Assignment</h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    Are you sure you want to delete
+                    <strong id="assignmentTitle"></strong>?
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                    <form asp-controller="Assignments" asp-action="Delete" method="post">
+
+                        <input type="hidden" name="classGuid" id="classGuid" value="@Model.ClassInfo.ClassGuid" />
+
+                        <input type="hidden" name="assignmentGuid" id="assignmentGuid" />
+
+                        <button type="submit" class="btn btn-danger">Delete</button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- =========================================================
+         SUBMIT ASSIGNMENT MODAL
+    ========================================================== -->
+    <div class="modal fade" id="submitAssignmentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Submit Assignment</h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form asp-controller="Submissions" asp-action="Insert" method="post" enctype="multipart/form-data">
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="assignmentGuid" name="assignmentGuid" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">Assignment File</label>
+
+                            <input type="file" name="submissionFile" class="form-control"
+                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" required />
+
+                            <div class="form-text">
+                                Upload your completed assignment.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-paper-plane me-1"></i>
+                            Submit
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Assignment Modal -->
+    <div class="modal fade" id="updateAssignmentModal" tabindex="-1"
+         aria-labelledby="updateAssignmentModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateAssignmentModalLabel">
+                        Update Assignment
+                    </h5>
+
+                    <button type="button" class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <form asp-controller="Submissions" asp-action="Update" method="post" enctype="multipart/form-data">
+
+                    <div class="modal-body">
+
+                        <input type="hidden" id="submissionGuid" name="submissionGuid" />
+
+                        <!-- Current File -->
+                        <div class="mb-3">
+                            <label class="form-label fw-medium">
+                                Current File
+                            </label>
+
+                            <div class="border rounded p-2">
+                                <i class="fa-solid fa-file me-2 text-primary"></i>
+
+                                <a id="currentSubmissionFile" href="#" target="_blank" class="text-decoration-none">
+                                    <i class="fa-solid fa-eye me-1"></i>
+                                    Open File
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- New File -->
+                        <div class="mb-3">
+                            <label for="submissionFile" class="form-label fw-medium">
+                                Replace File
+                            </label>
+
+                            <input type="file" class="form-control" id="submissionFile" name="submissionFile"
+                                   accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt" />
+
+                            <div class="form-text">
+                                Upload a new file only if you want to replace the current file.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-upload me-1"></i>
+                            Update
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignment Mark Modal -->
+    <!-- View Assignment Mark Modal -->
+    <div class="modal fade" id="assignmentMarkModal" tabindex="-1"
+         aria-labelledby="assignmentMarkModalLabel" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignmentMarkModalLabel">
+                        <i class="fa-solid fa-square-check text-success me-2"></i>
+                        Assignment Result
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Result -->
+                    <div id="assignmentMarkContent" class="d-none">
+
+                        <div class="text-center mb-4">
+                            <small class="text-muted d-block">
+                                Your Mark
+                            </small>
+
+                            <div class="mt-1">
+                                <span id="assignmentMark"
+                                      class="fs-1 fw-bold text-primary">
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="border rounded-3 p-3 bg-light">
+
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fa-solid fa-comment-dots text-primary me-2"></i>
+
+                                <span class="fw-semibold">
+                                    Teacher Feedback
+                                </span>
+                            </div>
+
+                            <div id="teacherFeedback"
+                                 class="text-muted">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+<div class="container-fluid px-4">
+
+    <!-- =========================================================
+             PAGE HEADER
+        ========================================================== -->
+    <div class="my-4">
+        <h4 class="mb-1 fw-semibold">
+            <i class="fa-solid fa-clipboard-list text-primary me-2"></i>
+            @Model.ClassInfo.ClassName - Section @Model.ClassInfo.Section
+        </h4>
+
+        <p class="text-muted mb-0">
+            Manage your assignments and student submissions.
+        </p>
+    </div>
+
+
+    @if (User.IsInRole("Teacher"))
+    {
+        <!-- =========================================================
+             SUMMARY CARDS
+        ========================================================== -->
+        <div class="row g-3 mb-4">
+
+            <!-- Total Assignments -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between
+                            align-items-start">
+
+                            <div>
+                                <p class="text-muted mb-2 small">Total Assignments</p>
+                                <h3 class="fw-bold mb-0">@Model.TotalAssignment</h3>
+                            </div>
+
+                            <div class="bg-primary bg-opacity-10
+                                text-primary rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
+
+                                <i class="fa-solid fa-clipboard-list fs-5"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Published -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between
+                            align-items-start">
+
+                            <div>
+                                <p class="text-muted mb-2 small">Published</p>
+                                <h3 class="fw-bold mb-0">@Model.PublishedAssignment</h3>
+                            </div>
+
+                            <div class="bg-success bg-opacity-10
+                                text-success rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
+
+                                <i class="fa-solid fa-circle-check fs-5"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Drafts -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between
+                            align-items-start">
+
+                            <div>
+                                <p class="text-muted mb-2 small">Drafts</p>
+                                <h3 class="fw-bold mb-0">@Model.DraftAssignment</h3>
+                            </div>
+
+                            <div class="bg-warning bg-opacity-10
+                                text-warning rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
+
+                                <i class="fa-solid fa-file-pen fs-5"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Submissions -->
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-1 shadow-sm h-100">
+                    <div class="card-body p-4">
+
+                        <div class="d-flex justify-content-between
+                            align-items-start">
+
+                            <div>
+                                <p class="text-muted mb-2 small">
+                                    Submissions
+                                </p>
+
+                                <h3 class="fw-bold mb-0">
+                                    @Model.TotalSubmissions
+                                </h3>
+                            </div>
+
+                            <div class="bg-info bg-opacity-10
+                                text-info rounded-3
+                                d-flex align-items-center
+                                justify-content-center"
+                                 style="width: 45px; height: 45px;">
+
+                                <i class="fa-solid fa-users fs-5"></i>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    }
+
+
+    <!-- =========================================================
+         ASSIGNMENTS CARD
+    ========================================================== -->
+
+    <div class="card border-1 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom p-4">
+
+            <div class="d-flex flex-column flex-sm-row
+                justify-content-between
+                align-items-sm-center gap-3">
+
+                <div>
+                    <h5 class="fw-semibold mb-1">
+                        <i class="fa-solid fa-file-lines text-primary me-2"></i>
+                        Assignment List
+                    </h5>
+
+                    <p class="text-muted small mb-0">
+                        View and manage assignments for this class.
+                    </p>
+                </div>
+
+                @if (User.IsInRole("Teacher"))
+                {
+                    <!-- Add Assignment -->
+                    <a asp-controller="Assignments" asp-action="Add" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
+                       class="btn btn-primary btn-sm px-3">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        Add Assignment
+                    </a>
+                }
+
+            </div>
+
+        </div>
+
+
+        <!-- Card Body -->
+        <div class="card-body p-4">
+
+            @if (Model.AllAssignment != null && Model.AllAssignment.Any())
+            {
+                <div class="row g-4">
+
+                    @foreach (var item in Model.AllAssignment)
+                    {
+                        <div class="col-12 col-xl-6">
+
+                            <div class="card h-100 border shadow-sm assignment-card">
+
+                                <div class="card-body p-4">
+
+                                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+
+                                        <div class="d-flex align-items-start">
+
+                                            <div class="assignment-icon bg-primary bg-opacity-10 text-primary
+                                                rounded-3 d-flex align-items-center justify-content-center
+                                                me-3 flex-shrink-0">
+                                                <i class="fa-solid fa-file-lines fa-lg"></i>
+                                            </div>
+
+                                            <div>
+
+                                                <!-- Title -->
+                                                <h5 class="fw-bold text-dark mb-2 assignment-title"> @item.Title </h5>
+
+                                                <!-- Description -->
+                                                <p class="text-muted small mb-0 assignment-description"> @item.Description </p>
+
+                                            </div>
+
+                                        </div>
+
+                                        @if (User.IsInRole("Teacher"))
+                                        {
+                                            if (item.IsPublish)
+                                            {
+                                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-3 py-2">
+                                                    <i class="fa-solid fa-circle-check me-1"></i>
+                                                    Published
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning px-3 py-2">
+                                                    <i class="fa-solid fa-file-pen me-1"></i>
+                                                    Draft
+                                                </span>
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
+                                            {
+                                                <span class="badge rounded-pill bg-info bg-opacity-10 text-info px-3 py-2">
+                                                    <i class="fa-solid fa-check-circle me-1"></i>
+                                                    Submitted
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-3 py-2">
+                                                    <i class="fa-solid fa-clock me-1"></i>
+                                                    Not Submitted
+                                                </span>
+                                            }
+                                        }
+
+                                    </div>
+
+                                    <div class="assignment-detail rounded-3 p-3 mb-3">
+
+                                        <div class="row g-3">
+
+                                            <div class="d-flex align-items-center">
+
+                                                <div class="detail-icon bg-white rounded-2 d-flex align-items-center
+                                                    justify-content-center me-3">
+                                                    <i class="fa-regular fa-clock text-danger"></i>
+                                                </div>
+
+                                                <div>
+                                                    <small class="text-muted d-block">
+                                                        Deadline
+                                                    </small>
+
+                                                    <span class="fw-semibold text-dark">
+                                                        @item.Deadline.ToString(
+                                                            "MMM dd, yyyy • hh:mm tt"
+                                                        )
+                                                    </span>
+
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-md-5">
+
+                                                <div class="d-flex align-items-center">
+
+                                                    <div class="detail-icon bg-white rounded-2 d-flex align-items-center justify-content-center me-3">
+                                                        <i class="fa-solid fa-star text-warning"></i>
+                                                    </div>
+
+                                                    <div>
+                                                        <small class="text-muted d-block">
+                                                            Total Marks
+                                                        </small>
+
+                                                        <span class="fw-semibold text-dark">
+                                                            @item.Marks
+                                                        </span>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-3">
+
+                                        <div class="d-flex align-items-center overflow-hidden">
+
+                                            <div class="text-muted me-2 flex-shrink-0">
+                                                <i class="fa-solid fa-paperclip"></i>
+                                            </div>
+
+                                            <div class="overflow-hidden">
+
+                                                <small class="text-muted d-block">
+                                                    Assignment File
+                                                </small>
+
+                                                <span class="fw-medium text-dark text-truncate d-block" style="max-width: 250px;">
+                                                    @System.IO.Path.GetFileName(item.FilePath)
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="d-flex gap-2 flex-shrink-0">
+
+                                            @if (!item.IsPublish)
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-danger delete-btn"
+                                                        data-id="@item.AssignmentGuid" data-title="@item.Title"
+                                                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+
+                                                    <i class="fa-solid fa-trash me-1"></i>
+                                                    Delete
+                                                </button>
+                                            }
+
+                                            @if (User.IsInRole("Teacher"))
+                                            {
+                                                <a asp-controller="Assignments" asp-action="Edit" asp-route-assignmentGuid="@item.AssignmentGuid"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fa-solid fa-pen me-1"></i>
+                                                    Edit
+                                                </a>
+                                            }
+
+                                            <a asp-controller="Assignments" asp-action="Download" asp-route-assignmentGuid="@item.AssignmentGuid"
+                                               target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                <i class="fa-solid fa-eye me-1"></i>
+                                                View File
+                                            </a>
+
+                                        </div>
+
+                                    </div>
+
+                                    <hr class="my-3">
+
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+
+                                        <div class="d-flex align-items-center">
+
+                                            <div class="submission-icon bg-success bg-opacity-10 text-success rounded-2
+                                                d-flex align-items-center justify-content-center me-2">
+                                                <i class="fa-solid fa-users"></i>
+                                            </div>
+
+                                            <div>
+                                                <small class="text-muted d-block">Submissions</small>
+
+                                                <span class="fw-semibold text-dark">
+                                                    @item.TotalSubmissions
+                                                    <span class="text-muted fw-normal">/@Model.TotalStudents</span>
+                                                </span>
+                                            </div>
+
+                                        </div>
+
+                                        @if (User.IsInRole("Teacher"))
+                                        {
+                                            <!-- Mark Submission -->
+                                            <a asp-controller="Submissions" asp-action="MarkSubmissions" asp-route-assignmentGuid="@item.AssignmentGuid"
+                                               class="btn btn-primary">
+                                                <i class="fa-solid fa-pen-to-square me-1"></i>
+                                                Mark Submissions
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <!-- Check if the assignment deadline has passed -->
+                                            if (item.Deadline > DateTime.Now)
+                                            {
+                                                if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
+                                                {
+                                                    var submission = Model.AllSubmissions.First(s => s.AssignmentId == item.Id);
+
+                                                    <!-- Update Assignment -->
+                                                    <button type="button" class="btn btn-warning submit-assignment" data-bs-toggle="modal"
+                                                            data-bs-target="#updateAssignmentModal"
+                                                            data-submission-guid="@submission.SubmissionGuid"
+                                                            data-file-path="@submission.FilePath"
+                                                            data-file-name="@System.IO.Path.GetFileName(submission.FilePath)"
+                                                            data-view-url="@Url.Action("ViewSubmissionFile", "Submissions",
+                                                                                                                                                                                                                                                         new { submissionGuid = submission.SubmissionGuid })">
+                                                        <i class="fa-solid fa-upload me-1"></i>
+                                                        Update
+                                                    </button>
+                                                }
+
+                                                else
+                                                {
+                                                    <!-- Submit Assignment -->
+                                                    <button type="button" class="btn btn-success submit-assignment" data-bs-toggle="modal"
+                                                            data-bs-target="#submitAssignmentModal" data-assignment-guid="@item.AssignmentGuid">
+                                                        <i class="fa-solid fa-upload me-1"></i>
+                                                        Submit
+                                                    </button>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (Model.AllSubmissions != null && Model.AllSubmissions.Any(s => s.AssignmentId == item.Id))
+                                                {
+                                                    <!-- View Assignment Mark -->
+                                                    <button type="button" class="btn btn-info view-assignment-mark"
+                                                            data-bs-toggle="modal" data-bs-target="#assignmentMarkModal"
+                                                            data-assignment-guid="@item.AssignmentGuid">
+                                                        <i class="fa-solid fa-eye me-1"></i>
+                                                        View Assignment Mark
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="button" class="btn btn-secondary" disabled>
+                                                        <i class="fa-solid fa-clock me-1"></i>
+                                                        Deadline Passed
+                                                    </button>
+                                                }
+                                            }
+                                        }
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <!-- ============================= -->
+                <!-- EMPTY STATE                   -->
+                <!-- ============================= -->
+
+                <div class="text-center py-5">
+
+                    <div class="empty-assignment-icon bg-light text-muted rounded-circle d-flex align-items-center justify-content-center
+                        mx-auto mb-3">
+                        <i class="fa-solid fa-file-circle-plus fa-2x"></i>
+                    </div>
+
+                    <h6 class="fw-semibold text-dark mb-2">
+                        No assignments yet
+                    </h6>
+
+                    @if (User.IsInRole("Teacher"))
+                    {
+                        <p class="text-muted mb-3">
+                            Create an assignment for this class to get started.
+                        </p>
+
+                        <a asp-controller="Assignments" asp-action="Add" asp-route-classGuid="@Model.ClassInfo.ClassGuid"
+                           class="btn btn-primary btn-sm px-3">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            Add Assignment
+                        </a>
+                    }
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).on("click", ".delete-btn", function() {
+
+            var id = $(this).data("id");
+            var title = $(this).data("title");
+
+            $("#assignmentGuid").val(id);
+            $("#assignmentTitle").text(title);
+
+        });
+
+        $(document).on('click', '.submit-assignment', function() {
+
+            var assignmentGuid = $(this).data('assignment-guid');
+
+            $('#assignmentGuid').val(assignmentGuid);
+        });
+
+        $(document).on("click", ".submit-assignment", function() {
+
+            var submissionGuid = $(this).data("submission-guid");
+            var fileName = $(this).data("file-name");
+            var viewUrl = $(this).data("view-url");
+
+            $("#submissionGuid").val(submissionGuid);
+
+            $("#currentSubmissionFile").text(fileName).attr("href", viewUrl);
+        });
+
+        setTimeout(function() {
+            var alert = document.querySelector('.alert');
+            if (alert) {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+            }
+        }, 3000);
+
+        // Handle the click event for viewing assignment marks
+        $(document).on("click", ".view-assignment-mark", function() {
+            var assignmentGuid = $(this).data("assignment-guid");
+            // Make an AJAX request to fetch the assignment mark and feedback
+            $.ajax({
+                url: '@Url.Action("GetAssignmentMark", "Submissions")',
+                type: 'GET',
+                data: { assignmentGuid: assignmentGuid },
+                success: function(response) {
+                    if (response.success && response.mark !== null) {
+                        $("#assignmentMark").text(response.mark);
+                        $("#teacherFeedback").text(response.feedback);
+                        $("#assignmentMarkContent").removeClass("d-none");
+                    } else {
+                        $("#assignmentMark").text("Marks not available yet.");
+                        $("#assignmentMarkContent").removeClass("d-none");
+                    }
+                },
+                error: function() {
+                    alert("An error occurred while fetching the assignment mark.");
+                }
+            });
+        });
+    </script>
+}
